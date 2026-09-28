@@ -1,0 +1,15 @@
+.vscode/**
+.vscode-test/**
+src/**
+test/**
+out/**
+docs/**
+esbuild.js
+tsconfig.json
+.node-version
+**/*.map
+**/*.ts
+media/make-icon.ps1
+.github/**
+.gitignore
+npm-debug.log*

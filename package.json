@@ -1,0 +1,226 @@
+{
+  "name": "sqladmin",
+  "displayName": "SQLAdmin — Oracle Database Tools",
+  "description": "Oracle database development toolkit for VS Code: connect, run SQL, edit results with commit/rollback, export, browse objects (SQL Developer-style), with PostgreSQL-ready driver abstraction.",
+  "version": "0.1.0",
+  "publisher": "Emon9426",
+  "license": "Apache-2.0",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Emon9426/SQLAdmin"
+  },
+  "engines": {
+    "vscode": "^1.85.0",
+    "node": ">=18"
+  },
+  "categories": [
+    "Programming Languages",
+    "Data Science",
+    "Other"
+  ],
+  "keywords": [
+    "oracle",
+    "sql",
+    "plsql",
+    "database",
+    "dbtools",
+    "tns",
+    "query"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "sqladmin.addConnection", "title": "SQLAdmin: 新建连接", "category": "SQLAdmin" },
+      { "command": "sqladmin.editConnection", "title": "编辑连接", "category": "SQLAdmin" },
+      { "command": "sqladmin.duplicateConnection", "title": "复制连接", "category": "SQLAdmin" },
+      { "command": "sqladmin.removeConnection", "title": "删除连接", "category": "SQLAdmin" },
+      { "command": "sqladmin.connect", "title": "连接", "category": "SQLAdmin" },
+      { "command": "sqladmin.disconnect", "title": "断开连接", "category": "SQLAdmin" },
+      { "command": "sqladmin.newWorksheet", "title": "新建 SQL 工作台", "category": "SQLAdmin" },
+      { "command": "sqladmin.runStatement", "title": "执行当前语句", "category": "SQLAdmin" },
+      { "command": "sqladmin.runScript", "title": "作为脚本执行", "category": "SQLAdmin" },
+      { "command": "sqladmin.commitTransaction", "title": "提交 (COMMIT)", "category": "SQLAdmin" },
+      { "command": "sqladmin.rollbackTransaction", "title": "回滚 (ROLLBACK)", "category": "SQLAdmin" },
+      { "command": "sqladmin.previewChanges", "title": "预览待提交更改", "category": "SQLAdmin" },
+      { "command": "sqladmin.discardAllChanges", "title": "丢弃全部未提交更改", "category": "SQLAdmin" },
+      { "command": "sqladmin.exportResults", "title": "导出结果", "category": "SQLAdmin" },
+      { "command": "sqladmin.openTableData", "title": "查看表数据", "category": "SQLAdmin" },
+      { "command": "sqladmin.viewDdl", "title": "查看 DDL", "category": "SQLAdmin" },
+      { "command": "sqladmin.generateSelect", "title": "生成 SELECT 骨架", "category": "SQLAdmin" },
+      { "command": "sqladmin.generateInsert", "title": "生成 INSERT 骨架", "category": "SQLAdmin" },
+      { "command": "sqladmin.refreshTree", "title": "刷新对象树", "category": "SQLAdmin" },
+      { "command": "sqladmin.showOutputChannel", "title": "显示输出通道", "category": "SQLAdmin" },
+      { "command": "sqladmin.createDemoConnection", "title": "创建演示连接 (Mock, 无需数据库)", "category": "SQLAdmin" }
+    ],
+    "keybindings": [
+      {
+        "command": "sqladmin.runStatement",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorTextFocus && editorLangId =~ /^(sqladmin-sql|sql|plsql)$/"
+      },
+      {
+        "command": "sqladmin.runScript",
+        "key": "ctrl+shift+enter",
+        "mac": "cmd+shift+enter",
+        "when": "editorTextFocus && editorLangId =~ /^(sqladmin-sql|sql|plsql)$/"
+      },
+      {
+        "command": "sqladmin.newWorksheet",
+        "key": "ctrl+alt+n",
+        "mac": "cmd+alt+n"
+      },
+      {
+        "command": "sqladmin.commitTransaction",
+        "key": "ctrl+alt+c",
+        "mac": "cmd+alt+c"
+      },
+      {
+        "command": "sqladmin.rollbackTransaction",
+        "key": "ctrl+alt+r",
+        "mac": "cmd+alt+r"
+      },
+      {
+        "command": "sqladmin.exportResults",
+        "key": "ctrl+alt+e",
+        "mac": "cmd+alt+e"
+      },
+      {
+        "command": "sqladmin.previewChanges",
+        "key": "ctrl+alt+v",
+        "mac": "cmd+alt+v"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sqladmin-explorer",
+          "title": "SQLAdmin",
+          "icon": "media/sidebar.svg"
+        }
+      ]
+    },
+    "views": {
+      "sqladmin-explorer": [
+        {
+          "id": "sqladmin.connections",
+          "name": "连接"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "sqladmin.connections",
+        "contents": "尚未创建数据库连接。\n[新建连接](command:sqladmin.addConnection)\n[创建演示连接 (Mock, 无需数据库)](command:sqladmin.createDemoConnection)\n要了解 SQLAdmin 功能，请查看 README。"
+      }
+    ],
+    "menus": {
+      "view/item/context": [
+        { "command": "sqladmin.editConnection", "when": "view == sqladmin.connections && viewItem == connection" },
+        { "command": "sqladmin.duplicateConnection", "when": "view == sqladmin.connections && viewItem == connection" },
+        { "command": "sqladmin.removeConnection", "when": "view == sqladmin.connections && viewItem == connection" },
+        { "command": "sqladmin.disconnect", "when": "view == sqladmin.connections && viewItem == connection" },
+        { "command": "sqladmin.openTableData", "when": "view == sqladmin.connections && viewItem == object.table" },
+        { "command": "sqladmin.viewDdl", "when": "view == sqladmin.connections && viewItem =~ /^object/" },
+        { "command": "sqladmin.generateSelect", "when": "view == sqladmin.connections && viewItem == object.table" },
+        { "command": "sqladmin.generateInsert", "when": "view == sqladmin.connections && viewItem == object.table" }
+      ]
+    },
+    "languages": [
+      {
+        "id": "sqladmin-sql",
+        "aliases": ["SQLAdmin SQL", "SQL"],
+        "extensions": [".sql"],
+        "configuration": "./language/plsql.language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sqladmin-sql",
+        "scopeName": "source.sql.plsql",
+        "path": "./language/plsql.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "SQLAdmin",
+      "properties": {
+        "sqladmin.defaultFetchRows": {
+          "type": "number",
+          "default": 500,
+          "description": "结果网格默认每批拉取行数"
+        },
+        "sqladmin.results.nullText": {
+          "type": "string",
+          "default": "(NULL)",
+          "description": "结果网格中 NULL 的显示文本"
+        },
+        "sqladmin.export.batchSize": {
+          "type": "number",
+          "default": 5000,
+          "description": "流式导出时每批行数"
+        },
+        "sqladmin.dbmsOutput.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "执行后自动回收 DBMS_OUTPUT"
+        },
+        "sqladmin.tns.customPath": {
+          "type": "string",
+          "default": "",
+          "description": "tnsnames.ora 自定义路径。留空则自动定位：TNS_ADMIN → %ORACLE_HOME%/network/admin"
+        },
+        "sqladmin.oracle.mode": {
+          "type": "string",
+          "enum": ["thin", "thick"],
+          "default": "thin",
+          "description": "Oracle 驱动模式：thin 纯 JS 免客户端(12.1+)；thick 需本机 Oracle Client(11.2+)"
+        },
+        "sqladmin.oracle.clientLibDir": {
+          "type": "string",
+          "default": "",
+          "description": "thick 模式 Oracle Client 库目录（留空使用 PATH 中的 Instant Client）"
+        },
+        "sqladmin.format.tabSize": {
+          "type": "number",
+          "default": 2,
+          "description": "SQL 格式化缩进宽度"
+        },
+        "sqladmin.format.uppercaseKeywords": {
+          "type": "boolean",
+          "default": true,
+          "description": "格式化时关键字大写"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "node esbuild.js --production",
+    "compile": "node esbuild.js && tsc --noEmit",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit",
+    "build:test": "tsc -p tsconfig.json",
+    "test:unit": "npm run build:test && mocha out/test/unit/**/*.test.js --reporter spec --timeout 20000",
+    "test:integration": "npm run build:test && node out/test/integration/runTest.js",
+    "test": "npm run test:unit && npm run test:integration",
+    "package:vsix": "vsce package"
+  },
+  "dependencies": {
+    "oracledb": "^6.10.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^2.4.0",
+    "esbuild": "^0.21.5",
+    "exceljs": "^4.4.0",
+    "mocha": "^10.4.0",
+    "sql-formatter": "^15.2.0",
+    "@vscode/vsce": "^2.29.0",
+    "typescript": "^5.4.5"
+  }
+}

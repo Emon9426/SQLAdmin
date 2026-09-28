@@ -1,0 +1,70 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "SQLAdmin SQL (Oracle)",
+  "scopeName": "source.sql.plsql",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#q-string" },
+    { "include": "#string" },
+    { "include": "#quoted-ident" },
+    { "include": "#number" },
+    { "include": "#operator" },
+    { "include": "#plsql-block" },
+    { "include": "#keywords" },
+    { "include": "#functions" },
+    { "include": "#types" },
+    { "include": "#bind" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-dash.sql", "match": "--.*$" },
+        { "name": "comment.block.sql", "begin": "/\\*", "end": "\\*/" }
+      ]
+    },
+    "string": {
+      "name": "string.quoted.single.sql",
+      "begin": "'", "end": "'",
+      "patterns": [{ "match": "''", "name": "constant.character.escape.sql" }]
+    },
+    "q-string": {
+      "name": "string.quoted.other.q.sql",
+      "begin": "(?i)q'([\\[({<])", "end": "'",
+      "patterns": [
+        { "match": "[\\])}>]", "name": "constant.character.escape.sql" }
+      ]
+    },
+    "quoted-ident": {
+      "name": "string.quoted.double.identifier.sql",
+      "begin": "\"", "end": "\""
+    },
+    "number": {
+      "name": "constant.numeric.sql",
+      "match": "\\b\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b|\\.\\d+"
+    },
+    "operator": {
+      "name": "keyword.operator.sql",
+      "match": ":=|\\|\\||<=|>=|<>|!=|=|<|>|\\+|-|\\*|/"
+    },
+    "plsql-block": {
+      "name": "keyword.control.plsql",
+      "match": "(?i)\\b(BEGIN|END|IF|THEN|ELSIF|ELSE|CASE|LOOP|WHILE|FOR|EXIT|RETURN|GOTO|DECLARE|EXCEPTION|WHEN|OTHERS|RAISE|IS|AS)\\b"
+    },
+    "keywords": {
+      "name": "keyword.other.sql",
+      "match": "(?i)\\b(SELECT|FROM|WHERE|GROUP\\s+BY|ORDER\\s+BY|HAVING|JOIN|LEFT|RIGHT|INNER|FULL|OUTER|CROSS|ON|AND|OR|NOT|IN|EXISTS|BETWEEN|LIKE|IS|NULL|AS|DISTINCT|UNION|ALL|MINUS|INTERSECT|INSERT|INTO|VALUES|UPDATE|SET|DELETE|MERGE|USING|COMMIT|ROLLBACK|SAVEPOINT|CREATE|REPLACE|TABLE|VIEW|SEQUENCE|INDEX|SYNONYM|TRIGGER|PROCEDURE|FUNCTION|PACKAGE|TYPE|ALTER|DROP|TRUNCATE|GRANT|REVOKE|COMMENT|PRIMARY|FOREIGN|KEY|REFERENCES|CONSTRAINT|CHECK|UNIQUE|DEFAULT|CASCADE|WITH|CONNECT|START|PRIOR|LEVEL|ROWNUM|OF|BY|ASC|DESC|ANY|SOME|BODY|CURSOR|OPEN|FETCH|CLOSE|FOUND|NOTFOUND|ROWTYPE|TYPE)\\b"
+    },
+    "functions": {
+      "name": "support.function.sql",
+      "match": "(?i)\\b(COUNT|SUM|AVG|MIN|MAX|NVL|NVL2|COALESCE|DECODE|CASE|UPPER|LOWER|INITCAP|LENGTH|SUBSTR|INSTR|TRIM|LTRIM|RTRIM|REPLACE|TRANSLATE|ROUND|TRUNC|MOD|ABS|CEIL|FLOOR|TO_CHAR|TO_DATE|TO_NUMBER|SYSDATE|SYSTIMESTAMP|CURRENT_DATE|ADD_MONTHS|MONTHS_BETWEEN|LAST_DAY|NEXT_DAY|EXTRACT|CAST|LISTAGG|ROW_NUMBER|RANK|DENSE_RANK|LAG|LEAD|DBMS_OUTPUT\\.PUT_LINE)\\b"
+    },
+    "types": {
+      "name": "storage.type.sql",
+      "match": "(?i)\\b(NUMBER|VARCHAR2|NVARCHAR2|CHAR|NCHAR|DATE|TIMESTAMP|TIMESTAMP\\s+WITH\\s+TIME\\s+ZONE|CLOB|BLOB|NCLOB|BINARY_FLOAT|BINARY_DOUBLE|RAW|LONG|ROWID|UROWID|INTEGER|INT|SMALLINT|FLOAT|REAL|BOOLEAN|PLS_INTEGER|BINARY_INTEGER)\\b"
+    },
+    "bind": {
+      "name": "variable.other.bind.sql",
+      "match": "(:[A-Za-z][A-Za-z0-9_$#]*)"
+    }
+  }
+}
