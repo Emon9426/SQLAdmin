@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SQLAdmin 需求文档（含可行性分析）v0.1</title>
+<title>SQLAdmin 需求文档（含可行性分析）v0.2</title>
 <style>
   :root{
     --ink:#1f2328; --sub:#57606a; --line:#d0d7de; --bg:#ffffff; --soft:#f6f8fa;
@@ -68,7 +68,7 @@
   <table class="meta">
     <tr><th>项目</th><td>SQLAdmin —— VS Code Oracle 数据库开发插件（对标 Oracle SQL Developer 核心功能）</td></tr>
     <tr><th>仓库</th><td><a href="https://github.com/Emon9426/SQLAdmin">https://github.com/Emon9426/SQLAdmin</a></td></tr>
-    <tr><th>文档版本</th><td>v0.1（草案）</td></tr>
+    <tr><th>文档版本</th><td>v0.2（评审修订）</td></tr>
     <tr><th>日期</th><td>2026-09-29</td></tr>
     <tr><th>状态</th><td>需求评审中 · 配套文档：<a href="prototype-design.html">原型设计文档</a></td></tr>
   </table>
@@ -297,11 +297,11 @@
 <h3>5.1 F1 连接管理</h3>
 <table class="grid">
   <tr><th style="width:70px">编号</th><th style="width:200px">需求</th><th style="width:64px">优先级</th><th>说明与验收要点</th></tr>
-  <tr><td>F1-01</td><td>新建/编辑/删除/复制连接</td><td><span class="tag m">M</span></td><td>字段：名称、类型（Oracle；PostgreSQL 预留置灰）、主机、端口(默认1521)、服务名/SID、用户名、密码、角色（DEFAULT/SYSDBA/SYSOPER）</td></tr>
+  <tr><td>F1-01</td><td>新建/编辑/删除/复制连接</td><td><span class="tag m">M</span></td><td>字段：名称、类型（Oracle；PostgreSQL 预留置灰）、连接模式（基本 / TNS 别名 / 连接串）、主机、端口(默认1521)、服务名/SID、用户名、密码、角色（DEFAULT/SYSDBA/SYSOPER）</td></tr>
   <tr><td>F1-02</td><td>测试连接</td><td><span class="tag m">M</span></td><td>表单内一键测试，返回成功/失败与错误码（ORA-xxx）</td></tr>
-  <tr><td>F1-03</td><td>密码安全存储</td><td><span class="tag m">M</span></td><td>VS Code SecretStorage；可选「不保存密码，连接时询问」</td></tr>
+  <tr><td>F1-03</td><td>保存连接 / 用户名 / 密码</td><td><span class="tag m">M</span></td><td>连接配置（主机/别名、端口、角色等）与用户名一并保存于本地；密码可选保存——仅入 VS Code SecretStorage（永不明文写入配置文件），或选择「不保存密码，连接时询问」；连接配置导出强制脱敏</td></tr>
   <tr><td>F1-04</td><td>连接树与状态</td><td><span class="tag m">M</span></td><td>侧边栏树展示已保存连接；状态徽标：已连接（绿）/连接中（转圈）/断开/错误；单连接可多会话（每工作台一个）</td></tr>
-  <tr><td>F1-05</td><td>Easy Connect / TNS 别名</td><td><span class="tag s">S</span></td><td>支持连接串模式与 tnsnames.ora 别名（thin 模式内建支持）</td></tr>
+  <tr><td>F1-05</td><td>本机 tnsnames.ora / TNS 别名</td><td><span class="tag m">M</span></td><td>三种寻址模式：基本 / TNS 别名 / 连接串（Easy Connect）。TNS 模式自动定位本机 tnsnames.ora（查找顺序：TNS_ADMIN 环境变量 → %ORACLE_HOME%\network\admin → 手动指定路径），解析并列出全部别名（悬浮显示 HOST/PORT/SERVICE 摘要），支持重新解析；解析失败提示出错行号与原因</td></tr>
   <tr><td>F1-06</td><td>只读连接开关</td><td><span class="tag s">S</span></td><td>连接级配置；开启后禁用网格编辑与 DML（US-07）</td></tr>
   <tr><td>F1-07</td><td>thick 模式开关</td><td><span class="tag s">S</span></td><td>连接级或全局指定 Oracle Client 路径（11.2+ 兼容，R2）</td></tr>
   <tr><td>F1-08</td><td>连接分组/颜色标签</td><td><span class="tag c">C</span></td><td>环境分组（DEV/TEST/PROD）与颜色标识，防误连</td></tr>
@@ -321,9 +321,10 @@
   <tr><td>F2-08</td><td>绑定变量</td><td><span class="tag s">S</span></td><td>识别 <code>:name</code>，执行前弹出赋值框（记住上次值，按会话缓存）</td></tr>
   <tr><td>F2-09</td><td>语法高亮与括号/折叠</td><td><span class="tag m">M</span></td><td>自研 TextMate 文法（SQL/PLSQL language contribution）</td></tr>
   <tr><td>F2-10</td><td>智能补全</td><td><span class="tag s">S</span></td><td>关键字、schema.对象、列（含 JOIN 别名解析）、存储过程签名；元数据异步缓存</td></tr>
-  <tr><td>F2-11</td><td>格式化/大小写转换</td><td><span class="tag s">S</span></td><td>sql-formatter（plsql 方言）；Shift+Alt+F</td></tr>
+  <tr><td>F2-11</td><td>格式化 / 缩进</td><td><span class="tag s">S</span></td><td>文档级 Shift+Alt+F、选区级 Ctrl+K Ctrl+F；基于 sql-formatter（plsql 方言）+ 语句切分器 AST：<b>PL/SQL 块感知缩进</b>（BEGIN/END、LOOP、IF/ELSIF、EXCEPTION 逐级缩进）；缩进宽度、空格或 Tab、关键字/标识符大小写、逗号与 AND/OR 对齐均可配置；格式化仅调整空白，不改变语义</td></tr>
   <tr><td>F2-12</td><td>执行计划</td><td><span class="tag s">S</span></td><td>预估计划：EXPLAIN PLAN + DBMS_XPLAN.DISPLAY，表格化展示；实际计划（需权限）C 级</td></tr>
   <tr><td>F2-13</td><td>查询历史</td><td><span class="tag c">C</span></td><td>按连接记录最近执行语句，可搜索回填</td></tr>
+  <tr><td>F2-14</td><td>代码导航与跳转</td><td><span class="tag m">M</span></td><td>Go to Definition（F12 / Ctrl+点击）：源码/DDL 中的标识符（表/视图/同义词/序列/过程/函数/包）跳转——表/视图打开结构页，代码对象打开源码（ALL_SOURCE）并定位到行；查找所有引用（Shift+F12，ALL_DEPENDENCIES + 源码扫描）；跳转到行 Ctrl+G（原生）；面包屑显示 Schema › 对象 › 子程序 › 行号；错误位置（F2-07）与调试栈帧（F6-06）跳转复用同一机制</td></tr>
 </table>
 
 <h3>5.3 F3 结果网格与数据编辑</h3>
@@ -337,7 +338,7 @@
   <tr><td>F3-06</td><td>行级增删</td><td><span class="tag m">M</span></td><td>新增行（网格底部 * 行，录入主键）；删除行支持多选；均入变更集</td></tr>
   <tr><td>F3-07</td><td>延迟行锁</td><td><span class="tag m">M</span></td><td>首次修改某行时按 ROWID 执行 <code>SELECT ... FOR UPDATE</code>；锁失败（ORA-00054）标红提示重试/跳过</td></tr>
   <tr><td>F3-08</td><td>变更集与 SQL 预览</td><td><span class="tag m">M</span></td><td>侧栏「待提交更改」列表（UPDATE/INSERT/DELETE 分组）；每项可查看绑定变量 SQL；单项可撤销</td></tr>
-  <tr><td>F3-09</td><td>提交 / 回滚</td><td><span class="tag m">M</span></td><td>工具栏与命令（Ctrl+Alt+C / Ctrl+Alt+R）；提交=变更集 DML 全部执行+COMMIT（原子）；失败回滚并报告；关闭网格有未提交更改时拦截确认</td></tr>
+  <tr><td>F3-09</td><td>提交 / 回滚</td><td><span class="tag m">M</span></td><td>工具栏与命令（Ctrl+Alt+C / Ctrl+Alt+R）：<b>仅当变更集非空时按钮可用</b>——可用态高亮+待处理计数徽标，空时置灰（网格工具栏/变更集面板/状态栏三处一致）；提交=变更集 DML 全部执行+COMMIT（原子），失败回滚并报告；回滚与关闭含未提交更改的网格需二次确认；<b>连接错误或带未提交更改断开时默认回滚</b>（服务端会话终止自动回滚未提交事务，UI 通知确认「回滚并丢弃（默认）/ 尝试重连」，重连后原事务已回滚、变更集同步清空）</td></tr>
   <tr><td>F3-10</td><td>编辑能力边界</td><td><span class="tag s">S</span></td><td>仅当查询为「单表可定位」（有可用 ROWID）时启用编辑；含 JOIN/聚合/ROWNUM 改写的结果为只读并说明原因</td></tr>
   <tr><td>F3-11</td><td>粘贴批量行</td><td><span class="tag c">C</span></td><td>从 Excel/TSV 粘贴多行多列，按列对齐入变更集</td></tr>
   <tr><td>F3-12</td><td>外键/引用完整性提示</td><td><span class="tag c">C</span></td><td>编辑违返约束时，错误消息翻译为可读提示（ORA-02291 等）</td></tr>
@@ -373,7 +374,7 @@
   <tr><td>F6-02</td><td>行断点</td><td><span class="tag m">M</span></td><td>编辑器行首槽点击设置；映射到 (OWNER, 对象名, 类型, 行号)（包体按 body 行号）；断点未验证/已验证/失效状态</td></tr>
   <tr><td>F6-03</td><td>启动/附加与停止</td><td><span class="tag m">M</span></td><td>F5 启动调试（目标会话执行程序，断点挂起时 UI 停在该行）；停止=DETACH 并终止目标会话执行</td></tr>
   <tr><td>F6-04</td><td>单步执行</td><td><span class="tag m">M</span></td><td>继续 / 单步跳入 / 单步跳过 / 跳出（DBMS_DEBUG.CONTINUE 各模式）</td></tr>
-  <tr><td>F6-05</td><td>变量查看</td><td><span class="tag m">M</span></td><td>局部变量（标量 + 记录/集合等复合类型树形展开）；标量可修值（SET_VALUE，S 级）</td></tr>
+  <tr><td>F6-05</td><td>变量值查看</td><td><span class="tag m">M</span></td><td>变量窗格显示全部局部变量<b>当前值</b>（标量 + RECORD/集合等复合类型树形展开、子项懒加载），值随断点挂起/单步自动刷新；<b>悬停源码标识符弹出 DataTip 即时值</b>；右键复制值；标量修值（SET_VALUE）为 S 级</td></tr>
   <tr><td>F6-06</td><td>调用栈</td><td><span class="tag m">M</span></td><td>栈帧列表（GET_STACK），点击跳转对应对象源码行</td></tr>
   <tr><td>F6-07</td><td>监视表达式</td><td><span class="tag s">S</span></td><td>标量表达式求值（GET_VALUE 语法）</td></tr>
   <tr><td>F6-08</td><td>DBMS_OUTPUT 联动</td><td><span class="tag s">S</span></td><td>调试挂起/结束时回收 DBMS_OUTPUT 到调试控制台</td></tr>
@@ -467,8 +468,15 @@
   <li>utPLSQL：<a href="https://github.com/utPLSQL/utPLSQL">utPLSQL/utPLSQL</a>（Apache-2.0）；gvenzl/oracle-free：<a href="https://github.com/gvenzl/oracle-free">测试镜像</a></li>
 </ul>
 
+<h3>修订记录</h3>
+<table class="grid">
+  <tr><th style="width:80px">版本</th><th style="width:110px">日期</th><th>说明</th></tr>
+  <tr><td>v0.1</td><td>2026-09-29</td><td>初稿</td></tr>
+  <tr><td>v0.2</td><td>2026-09-29</td><td>评审修订：TNS 别名与本机 tnsnames.ora 支持升级为必须（F1-05），明确连接/用户名/密码保存策略（F1-03）；提交/回滚按钮可用性规则与断开默认回滚策略（F3-09）；新增代码导航与跳转 F2-14（必须）；强化缩进格式化要求（F2-11）；调试变量值查看含 DataTip（F6-05）；配套原型文档修复 W-01/W-05/W-07 排版并更新对应线框</td></tr>
+</table>
+
 <footer>
-  SQLAdmin 需求文档 v0.1 · 2026-09-29 · 仓库 <a href="https://github.com/Emon9426/SQLAdmin">github.com/Emon9426/SQLAdmin</a> ·
+  SQLAdmin 需求文档 v0.2 · 2026-09-29 · 仓库 <a href="https://github.com/Emon9426/SQLAdmin">github.com/Emon9426/SQLAdmin</a> ·
   配套文档：<a href="prototype-design.html">原型设计文档</a> · 本文档由需求阶段产出，评审通过后冻结为开发基线
 </footer>
 </div>

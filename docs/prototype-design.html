@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SQLAdmin 原型设计文档 v0.1</title>
+<title>SQLAdmin 原型设计文档 v0.2</title>
 <style>
   :root{
     --ink:#1f2328; --sub:#57606a; --line:#d0d7de; --soft:#f6f8fa;
@@ -38,7 +38,7 @@
   kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:12px;background:var(--soft);font-family:Consolas,monospace}
 
   /* ============ 线框图工具集（VS Code 深色风格低保真） ============ */
-  .wf{background:#1e1e1e;color:#ccc;border:1px solid #000;border-radius:8px;overflow:hidden;margin:14px 0;
+  .wf{position:relative;background:#1e1e1e;color:#ccc;border:1px solid #000;border-radius:8px;overflow:hidden;margin:14px 0;
       font-family:"Segoe UI",system-ui,sans-serif;font-size:12.5px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
   .wf *{box-sizing:border-box}
   .fig-cap{font-size:13px;color:var(--sub);text-align:center;margin:2px 0 18px}
@@ -56,7 +56,7 @@
   .tab{padding:7px 14px;color:#9d9d9d;border-right:1px solid #252526;display:flex;gap:8px;align-items:center;white-space:nowrap}
   .tab.on{background:#1e1e1e;color:#fff;border-top:1px solid #007acc}
   .tab .x{opacity:.6}
-  .editor{background:#1e1e1e;flex:1;padding:6px 0 0 0;overflow:hidden}
+  .editor{background:#1e1e1e;flex:1;padding:6px 0 0 0;overflow:auto}
   .edrow{display:flex;font-family:Consolas,monospace;font-size:12.5px;line-height:19px;white-space:pre}
   .ln{width:46px;text-align:right;color:#6e7681;padding-right:14px;flex-shrink:0;user-select:none}
   .gut{width:22px;flex-shrink:0;position:relative}
@@ -85,9 +85,17 @@
   .dg tr.del td{background:#5a1d1d;color:#999;text-decoration:line-through;box-shadow:inset 2px 0 0 #f85149}
   .dg td.nul{color:#8b949e;font-style:italic}
   .dg td.err{background:#5a1d1d;color:#ffa198}
-  .pfoot{display:flex;justify-content:space-between;padding:4px 12px;background:#252526;color:#999;font-size:11.5px;border-top:1px solid #333}
+  .dgwrap{overflow-x:auto}
+  .btn.dis,.tbi.dis{opacity:.35;filter:grayscale(.9);cursor:not-allowed}
+  .btn.hl{box-shadow:0 0 0 1px rgba(255,255,255,.18),0 0 10px rgba(46,160,67,.5)}
+  .btn.hw{box-shadow:0 0 0 1px rgba(255,255,255,.18),0 0 10px rgba(154,103,0,.55)}
+  .crumb{display:flex;gap:6px;align-items:center;font-size:11.5px;color:#aaa;padding:4px 14px;background:#252526;border-bottom:1px solid #333;flex-wrap:wrap}
+  .jump{color:#4daafc;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .datatip{position:absolute;background:#252526;border:1px solid #454545;border-radius:4px;padding:7px 11px;font-size:12px;box-shadow:0 6px 18px rgba(0,0,0,.5);z-index:9;line-height:1.6}
+  .notif{position:absolute;right:14px;bottom:34px;background:#252526;border:1px solid #454545;border-left:3px solid #9a6700;border-radius:5px;padding:10px 14px;font-size:12px;color:#ddd;box-shadow:0 6px 18px rgba(0,0,0,.5);max-width:340px;z-index:9}
+  .pfoot{display:flex;flex-wrap:wrap;gap:3px 18px;justify-content:space-between;padding:4px 12px;background:#252526;color:#999;font-size:11.5px;border-top:1px solid #333}
   /* 状态栏 */
-  .status{display:flex;background:#007acc;color:#fff;font-size:11.5px;height:24px;align-items:center}
+  .status{display:flex;background:#007acc;color:#fff;font-size:11.5px;height:24px;align-items:center;overflow:hidden}
   .status span{padding:0 10px;white-space:nowrap}
   .status .r{margin-left:auto;display:flex}
   /* 树 */
@@ -111,7 +119,7 @@
   .sel{flex:1;background:#3c3c3c;border:1px solid #555;color:#eee;border-radius:2px;padding:5px 9px;font-size:12.5px;display:flex;justify-content:space-between}
   .sel.dis{color:#777}
   .ckb{color:#ccc;font-size:12.5px;display:flex;gap:6px;align-items:center;margin:8px 0 8px 120px}
-  .radio{color:#ccc;font-size:12.5px;display:flex;gap:18px;margin:6px 0 6px 120px}
+  .radio{color:#ccc;font-size:12.5px;display:flex;flex-direction:column;gap:7px;margin:6px 0 6px 120px}
   .mfoot{padding:12px 18px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #333}
   /* 菜单 */
   .ctx{position:absolute;background:#252526;border:1px solid #454545;border-radius:6px;padding:5px;min-width:210px;box-shadow:0 8px 30px rgba(0,0,0,.55);z-index:5;font-size:12.5px}
@@ -150,7 +158,7 @@
   <table class="meta">
     <tr><th>项目</th><td>SQLAdmin —— VS Code Oracle 数据库开发插件</td></tr>
     <tr><th>仓库</th><td><a href="https://github.com/Emon9426/SQLAdmin">https://github.com/Emon9426/SQLAdmin</a></td></tr>
-    <tr><th>文档版本</th><td>v0.1（草案，低保真线框）</td></tr>
+    <tr><th>文档版本</th><td>v0.2（评审修订，低保真线框）</td></tr>
     <tr><th>日期</th><td>2026-09-29</td></tr>
     <tr><th>状态</th><td>设计评审中 · 上游输入：<a href="requirements.html">需求文档</a>（FR 编号互引）</td></tr>
   </table>
@@ -248,8 +256,9 @@
           <span style="flex:1"></span>
           <span class="tbi gr">＋ 行</span><span class="tbi rd">－ 删行</span>
           <span class="tbi am">👁 预览更改 <b class="amb">(3)</b></span>
-          <span class="btn gr">✓ 提交</span><span class="btn warnb">↩ 回滚</span><span class="tbi">⬇ 导出</span>
+          <span class="btn gr hl">✓ 提交 (3)</span><span class="btn warnb hw">↩ 回滚</span><span class="tbi">⬇ 导出</span>
         </div>
+        <div class="dgwrap">
         <table class="dg">
           <tr><th style="width:26px">·</th><th>EMPLOYEE_ID <span class="k">🔑</span></th><th>FIRST_NAME</th><th>LAST_NAME</th><th>DEPARTMENT_NAME</th><th>SALARY ▲</th><th>HIRE_DATE</th></tr>
           <tr class="sel"><td>▸</td><td>206</td><td>William</td><td class="mod">Gietz-Wagner</td><td>Accounting</td><td class="mod">9,200.00</td><td>2007-06-07</td></tr>
@@ -258,6 +267,7 @@
           <tr><td></td><td>204</td><td>Hermann</td><td class="nul">NULL</td><td>Sales</td><td>10,000.00</td><td>2021-05-11</td></tr>
           <tr class="del"><td></td><td>203</td><td>Susan</td><td>Mavris</td><td>Human Resources</td><td>6,500.00</td><td>2019-06-07</td></tr>
         </table>
+        </div>
         <div class="pfoot"><span>已选 1 行 · 已修改 1 · 新增 1 · 删除 1 · 已加载 500 / 共 107 行</span><span>46 ms</span></div>
       </div>
     </div>
@@ -275,7 +285,7 @@
   <li><b class="mk">连接树</b>：已保存连接列表 → 展开为 schema → 对象类型（懒加载+计数）→ 对象；绿色 ● 表示已连接；最后一项固定为「新建连接」。对象可拖拽到编辑器插入名称。</li>
   <li><b class="mk">编辑器</b>：普通 <code>.sql</code> 文档（SQL 语法高亮、补全、格式化）；编辑器右上角显示会话选择器「DEV-ORACLE · HR ▾」，可切换本工作台绑定的连接会话。</li>
   <li><b class="mk">结果面板</b>：随执行出现在编辑器下方。多语句执行生成多个「结果 N」标签；与「脚本输出 / DBMS_OUTPUT / 执行计划」并列。</li>
-  <li><b class="mk">结果工具栏</b>：刷新/筛选 + 编辑动作（加行/删行/预览更改/提交/回滚）+ 导出。<b>仅当结果集可定位单表行（含 ROWID）时编辑动作可用</b>，否则整组置灰并悬浮提示原因（F3-10）。</li>
+  <li><b class="mk">结果工具栏</b>：刷新/筛选 + 编辑动作（加行/删行/预览更改/提交/回滚）+ 导出。<b>仅当结果集可定位单表行（含 ROWID）时编辑动作可用</b>，否则整组置灰并悬浮提示原因（F3-10）；<b>「✓ 提交 / ↩ 回滚」仅在变更集非空时可用</b>——可用时高亮发光+待处理计数徽标，为空时置灰（状态对照见 W-06，F3-09）。</li>
   <li><b class="mk">状态栏</b>：右下区域显示 当前连接·schema、事务徽标（琥珀色「未提交 N 项更改」）、驱动模式（thin/thick）。点击事务徽标=预览更改。</li>
 </ol></div>
 
@@ -290,25 +300,33 @@
       <div class="frow"><label>名称</label><div class="inp">DEV-ORACLE</div></div>
       <div class="frow"><label>连接类型</label><div class="sel"><span>Oracle Database</span><span>▾</span></div></div>
       <div class="frow"><label>&nbsp;</label><div class="sel dis"><span>PostgreSQL（预留，v1.0）</span><span> 🔒</span></div></div>
+      <div class="frow"><label>连接模式</label>
+        <div style="flex:1;display:flex;gap:18px;color:#ccc;font-size:12.5px;flex-wrap:wrap;align-items:center">
+          <span>● 基本</span><span>○ TNS 别名</span><span>○ 连接串</span>
+          <span class="gry" style="font-size:11px">（TNS＝解析本机 tnsnames.ora）</span>
+        </div>
+      </div>
       <div class="frow"><label>主机名</label><div class="inp" style="flex:2">localhost</div><label style="width:44px">端口</label><div class="inp">1521</div></div>
       <div class="frow"><label>服务名 / SID</label><div class="sel"><span>使用服务名： XEPDB1</span><span>▾</span></div></div>
+      <div class="frow"><label>网络别名 (TNS)</label><div class="sel"><span>DEV_REMOTE　<span class="gry" style="font-size:11px">已解析 5 个别名</span></span><span>⟳　▾</span></div></div>
+      <div class="frow"><label>tnsnames.ora</label><div class="inp2" style="font-size:11.5px"><span>C:\app\client\product\23\dbhome\network\admin\tnsnames.ora</span><span class="blu">浏览…　⟳ 重新解析</span></div></div>
       <div class="frow"><label>角色</label><div class="sel"><span>default</span><span>▾</span></div></div>
       <div class="frow"><label>用户名</label><div class="inp">hr</div></div>
       <div class="frow"><label>密码</label><div class="inp">••••••••••</div></div>
-      <div class="ckb">☑ 保存密码（存储于 VS Code 安全存储，永不明文写入配置文件）</div>
+      <div class="ckb">☑ 保存用户名与密码（密码仅入 VS Code 安全存储，永不明文写入配置文件）</div>
       <div class="ckb">☐ 只读连接（禁用结果编辑与 DML 执行确认）　☐ 使用 thick 模式（Oracle Client 11.2+ 兼容）</div>
       <div class="ckb" style="margin-left:0;color:#3794ff">▸ 高级（连接串模式 / TNS 别名 / 代理 / 会话参数）</div>
     </div>
     <div class="mfoot"><button class="btn ghost">测试连接</button><button class="btn ghost">取消</button><button class="btn">保存</button></div>
   </div></div>
 </div>
-<p class="fig-cap">图 W-02 · 新建连接：类型下拉已含 PostgreSQL 预留项（置灰）；密码仅入 SecretStorage（F1-03）</p>
+<p class="fig-cap">图 W-02 · 新建连接：连接模式 基本/TNS/连接串；TNS 解析本机 tnsnames.ora；连接、用户名、密码均可保存（F1-03/05）；类型下拉含 PostgreSQL 预留项（置灰）</p>
 
 <div class="anno"><b>交互说明：</b>
 <ol>
   <li><b>测试连接</b>：异步执行，按钮转圈；成功显示绿色通知「已连接（Oracle Database 19c Enterprise Edition）」，失败显示错误码与原因（如 <code>ORA-12541: TNS:no listener</code>）。</li>
-  <li><b>服务名/SID/连接串/TNS</b> 三种寻址模式切换（F1-05）；TNS 模式下可浏览 tnsnames.ora 中的别名。</li>
-  <li><b>保存</b>后连接立即出现在侧栏树；未连接状态为灰色 ○，点击或 Enter 触发连接（转圈 ◐ → 绿 ● / 红 ● 失败 tooltip）。</li>
+  <li><b>寻址模式</b>（F1-05，M）：基本 / TNS 别名 / 连接串三种切换。TNS 模式自动定位本机 tnsnames.ora（查找顺序：TNS_ADMIN 环境变量 → %ORACLE_HOME%\network\admin → 手动指定路径），别名下拉列出解析结果并悬浮显示 HOST/PORT/SERVICE 摘要；⟳ 重新解析；解析失败提示出错的行号与原因。</li>
+  <li><b>保存</b>：连接（主机/别名、端口、角色等）与用户名一并保存；密码勾选后仅入 VS Code 安全存储（F1-03）。保存后连接立即出现在侧栏树；未连接状态为灰色 ○，点击或 Enter 触发连接（转圈 ◐ → 绿 ● / 红 ● 失败 tooltip）。</li>
   <li>「只读连接」为 DBA 场景防误操作（US-07）：网格工具栏编辑组隐藏，DML 语句执行前弹拦截确认。</li>
 </ol></div>
 
@@ -352,6 +370,7 @@
       <div class="tab on">📄 payroll_check.sql <span class="x">✕</span></div>
       <div class="tab">📄 emp_report.sql <span class="x">✕</span></div>
     </div>
+    <div class="crumb">🗂 HR <span class="gry">›</span> PAYROLL（包体） <span class="gry">›</span> RUN_MONTHLY <span class="gry">›</span> 第 61 行　<span class="gry">F12 跳转定义 · Shift+F12 引用 · Ctrl+G 跳转到行</span></div>
     <div class="ptool" style="background:#252526">
       <span class="btn" style="background:#0e639c">▶ 运行语句</span>
       <span class="tbi">⏩ 运行脚本</span>
@@ -365,7 +384,7 @@
       <div class="edrow"><span class="ln">1</span><span class="gut"></span><span class="kw">DECLARE</span></div>
       <div class="edrow"><span class="ln">2</span><span class="gut"></span><span class="tx">  </span><span class="id">v_total</span><span class="tx"> </span><span class="kw">NUMBER</span><span class="tx"> := </span><span class="num">0</span><span class="tx">;</span></div>
       <div class="edrow"><span class="ln">3</span><span class="gut"></span><span class="kw">BEGIN</span></div>
-      <div class="edrow"><span class="ln">4</span><span class="gut"></span><span class="tx">  </span><span class="kw">SELECT</span><span class="tx"> </span><span class="fn">SUM</span><span class="tx">(</span><span class="id">salary</span><span class="tx">) </span><span class="kw">INTO</span><span class="tx"> </span><span class="id">v_total</span><span class="tx"> </span><span class="kw">FROM</span><span class="tx"> </span><span class="id">employees</span><span class="tx">;</span></div>
+      <div class="edrow"><span class="ln">4</span><span class="gut"></span><span class="tx">  </span><span class="kw">SELECT</span><span class="tx"> </span><span class="fn">SUM</span><span class="tx">(</span><span class="id">salary</span><span class="tx">) </span><span class="kw">INTO</span><span class="tx"> </span><span class="id">v_total</span><span class="tx"> </span><span class="kw">FROM</span><span class="tx"> </span><span class="jump">employees</span><span class="tx">;</span></div>
       <div class="edrow"><span class="ln">5</span><span class="gut"></span><span class="tx">  </span><span class="id">DBMS_OUTPUT</span><span class="tx">.</span><span class="fn">put_line</span><span class="tx">(</span><span class="str">'工资总额: '</span><span class="tx"> || </span><span class="id">v_total</span><span class="tx">);</span></div>
       <div class="edrow"><span class="ln">6</span><span class="gut"></span><span class="kw">END</span><span class="tx">;</span></div>
       <div class="edrow"><span class="ln">7</span><span class="gut"></span><span class="tx"> </span></div>
@@ -397,6 +416,8 @@
   <li><b>取消</b>：仅长查询出现；调用 <code>connection.break()</code>，完成后通知已取消（F2-05）。</li>
   <li><b>错误反馈</b>：ORA 错误以编辑器「问题」波浪线 + 行内悬浮呈现，并利用 <code>errorOffset</code> 直接跳到出错位置（F2-07）。</li>
   <li><b>绑定变量</b>：语句含 <code>:name</code> 时先弹出赋值 QuickPick（类型推断 + 记住上次值）（F2-08）。</li>
+  <li><b>代码导航（F2-14，M）</b>：源码中带下划线的标识符（如 <span class="jump">employees</span>）支持 Ctrl+点击 / F12 跳转定义——表/视图/同义词打开结构页，过程/函数/包打开源码并定位到行；Shift+F12 查找所有引用（ALL_DEPENDENCIES + 源码扫描）；Ctrl+G 跳转到行（原生）；面包屑显示 当前 Schema › 对象 › 子程序 › 行号，点击任意层级快速切换；错误位置、调试栈帧跳转复用同一机制。</li>
+  <li><b>格式化 / 缩进（F2-11）</b>：Shift+Alt+F 格式化文档、Ctrl+K Ctrl+F 格式化选区；PL/SQL 块感知缩进（BEGIN/END、LOOP、IF/ELSIF、EXCEPTION 逐级缩进）；缩进宽度、空格或 Tab、关键字/标识符大小写、逗号与 AND/OR 对齐均可配置；格式化仅调整空白，不改变语义。</li>
 </ol></div>
 
 <!-- ============================================================ -->
@@ -410,8 +431,9 @@
       <span class="tbi">🔍 筛选 ▾</span><span class="tbi">↕ 排序 ▾</span><span class="tbi">🔄 刷新</span>
       <span style="flex:1"></span>
       <span class="tbi gr">＋ 行</span><span class="tbi rd">－ 删行</span><span class="tbi">⌫ 撤销单元格</span>
-      <span class="tbi am">👁 预览更改 (3)</span><span class="btn gr">✓ 提交</span><span class="btn warnb">↩ 回滚</span><span class="tbi">⬇ 导出</span>
+      <span class="tbi am">👁 预览更改 (3)</span><span class="btn gr hl">✓ 提交 (3)</span><span class="btn warnb hw">↩ 回滚</span><span class="tbi">⬇ 导出</span>
     </div>
+    <div class="dgwrap">
     <table class="dg">
       <tr><th style="width:26px">·</th><th>EMPLOYEE_ID <span class="k">🔑</span></th><th>FIRST_NAME</th><th>LAST_NAME</th><th>DEPARTMENT_NAME</th><th>SALARY</th><th>HIRE_DATE</th><th>COMMISSION_PCT</th></tr>
       <tr class="sel"><td>▸</td><td>206</td><td>William</td><td class="mod">Gietz-Wagner ✎</td><td>Accounting</td><td class="mod">9,200.00 ✎</td><td>2007-06-07</td><td class="nul">NULL</td></tr>
@@ -420,6 +442,7 @@
       <tr><td></td><td>204</td><td>Hermann</td><td class="nul">NULL</td><td>Sales</td><td>10,000.00</td><td>2021-05-11</td><td class="nul">NULL</td></tr>
       <tr class="del"><td></td><td>203</td><td>Susan</td><td>Mavris</td><td>Human Resources</td><td>6,500.00</td><td>2019-06-07</td><td class="nul">NULL</td></tr>
     </table>
+    </div>
     <div class="pfoot">
       <span>行 1–5 / 已加载 500 / 共 107 · 已选 1 行 · <span class="amb">更改 3（改1 增1 删1）</span> · 修改即锁定该行 (ROWID)</span>
       <span>双击列头排序 · 双击单元格编辑 · F2 打开单元格查看器</span>
@@ -447,6 +470,11 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
 
 <h3>W-06 待提交更改（变更集）与提交确认</h3>
 <div class="wf">
+  <div class="ptool" style="border:none;border-bottom:1px solid #333">
+    <span class="gry" style="font-size:11.5px">变更集为空：</span><span class="btn dis">✓ 提交</span><span class="btn dis">↩ 回滚</span>
+    <span style="flex:1"></span>
+    <span class="grn" style="font-size:11.5px">变更集非空：</span><span class="btn gr hl">✓ 提交 (3)</span><span class="btn warnb hw">↩ 回滚 (3)</span>
+  </div>
   <div class="wb">
     <div class="side" style="width:300px">
       <div class="hd"><span>待提交更改 · DEV-ORACLE</span><span>⋯</span></div>
@@ -482,8 +510,19 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
       </div>
     </div>
   </div>
+  <div class="notif">⚠ <b>连接已断开</b>（ORA-03113）<br>3 项未提交更改将按默认策略 <b style="color:#e2b93d">回滚（ROLLBACK）</b> 丢弃
+    <div style="display:flex;gap:8px;margin-top:8px"><span class="btn warnb">回滚并丢弃（默认）</span><span class="btn ghost">尝试重连</span></div>
+  </div>
 </div>
-<p class="fig-cap">图 W-06 · 变更集侧栏 + 逐条 DML 预览（差异注释）+ 提交确认；回滚同样需要确认（丢弃全部未提交更改）</p>
+<p class="fig-cap">图 W-06 · 按钮状态对照（空=置灰 / 非空=高亮+计数）+ 变更集侧栏 + 逐条 DML 预览 + 提交确认；连接断开时默认回滚（右下通知）</p>
+
+<div class="anno"><b>交互规则（F3-09）：</b>
+<ol>
+  <li><b>可用性：</b>「✓ 提交 / ↩ 回滚」仅在变更集非空时可用——可用态高亮发光 + 待处理计数徽标；空变更集置灰半透明、不可点击。网格工具栏、变更集面板底部、状态栏徽标三处行为一致。</li>
+  <li><b>提交：</b>确认框列出操作清单（1 UPDATE + 1 INSERT + 1 DELETE）→ 同一事务执行 → 全部成功 COMMIT 并刷新受影响行；任一失败整体 ROLLBACK 并标红冲突行。</li>
+  <li><b>回滚 / 关闭拦截：</b>丢弃全部未提交更改需二次确认；含未提交更改的结果标签页显示 ● 圆点提醒。</li>
+  <li><b>连接错误 / 带未提交更改断开：</b>服务端会话终止即自动回滚未提交事务；UI 弹出通知，<b>默认动作=回滚并丢弃</b>本地变更集，可选「尝试重连」——重连后原事务已不存在，变更集同样清空（不可恢复提交）。</li>
+</ol></div>
 
 <!-- ============================================================ -->
 <h2 id="s6">6. 导出</h2>
@@ -496,11 +535,29 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
           <span class="tbi" style="background:#0e639c;color:#fff">CSV</span><span class="tbi">XLSX</span><span class="tbi">JSON</span><span class="tbi">INSERT 语句</span><span class="tbi">HTML 报表</span>
         </div>
       </div>
-      <div class="frow"><label>范围</label><div class="radio" style="margin:0">
-        <span>○ 已加载的 500 行</span><span>● 全部行（流式重查 · 共 107）</span><span>○ 选中行 (1)</span></div></div>
-      <div class="ckb" style="margin-left:120px">☑ 包含列头　☑ NULL 显示为 <span style="font-family:monospace">NULL</span></div>
-      <div class="ckb" style="margin-left:120px">编码： UTF-8 ▾　　分隔符： , ▾　　日期格式： YYYY-MM-DD ▾</div>
-      <div class="ckb" style="margin-left:120px">目标： 保存到文件… ▾　（XLSX：每 1,000,000 行自动分 Sheet）</div>
+      <div class="frow"><label>范围</label>
+        <div class="radio" style="margin:0">
+          <span>● 全部行（流式重查 · 共 107 行）</span>
+          <span>○ 已加载的 500 行</span>
+          <span>○ 选中行（1 行）</span>
+        </div>
+      </div>
+      <div class="frow"><label>选项</label>
+        <div style="flex:1;color:#ccc;font-size:12.5px;display:flex;flex-direction:column;gap:7px">
+          <span>☑ 包含列头　　☑ NULL 显示为 <span style="font-family:monospace">NULL</span></span>
+          <span>☑ XLSX 每 1,000,000 行自动分 Sheet</span>
+        </div>
+      </div>
+      <div class="frow"><label>编码 / 分隔符</label>
+        <div class="sel" style="max-width:130px"><span>UTF-8</span><span>▾</span></div>
+        <div class="sel" style="max-width:110px"><span>,（逗号）</span><span>▾</span></div>
+      </div>
+      <div class="frow"><label>日期格式</label>
+        <div class="sel" style="max-width:200px"><span>YYYY-MM-DD</span><span>▾</span></div>
+      </div>
+      <div class="frow"><label>目标</label>
+        <div class="sel"><span>保存到文件…（完成后可打开所在位置）</span><span>▸</span></div>
+      </div>
     </div>
     <div class="mfoot"><button class="btn ghost">取消</button><button class="btn">开始导出</button></div>
   </div></div>
@@ -552,6 +609,7 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
       <div class="ptab on">列</div><div class="ptab">数据</div><div class="ptab">约束</div><div class="ptab">索引</div>
       <div class="ptab">触发器</div><div class="ptab">授权</div><div class="ptab">统计</div><div class="ptab">DDL</div>
     </div>
+    <div class="dgwrap">
     <table class="dg">
       <tr><th>列名</th><th>数据类型</th><th>可空</th><th>默认值</th><th>注释</th></tr>
       <tr><td>EMPLOYEE_ID 🔑</td><td>NUMBER(6,0)</td><td class="nul">NOT NULL</td><td class="nul">NULL</td><td>主键，员工编号</td></tr>
@@ -559,8 +617,9 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
       <tr><td>HIRE_DATE</td><td>DATE</td><td class="nul">NOT NULL</td><td>SYSDATE</td><td>入职日期</td></tr>
       <tr><td>SALARY</td><td>NUMBER(8,2)</td><td class="nul">NULL</td><td class="nul">NULL</td><td>月薪，CHECK &gt; 0</td></tr>
     </table>
+    </div>
     <div class="ptool" style="border:none">
-      <span class="tbi">⬇ 导出列清单</span><span class="tbi">📋 复制为 CREATE TABLE</span>
+      <span class="tbi">⬇ 导出列清单</span><span class="tbi">📋 复制为 CREATE TABLE</span><span class="tbi">🔗 F12 跳转定义 · Shift+F12 查找引用</span>
       <span style="flex:1"></span><span class="gry" style="font-size:11.5px">「数据」标签 = 打开可编辑网格（自动 SELECT ... t.ROWID, t.*）</span>
     </div>
   </div>
@@ -572,7 +631,7 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
   <div class="main">
     <div class="tabs"><div class="tab on">📄 DDL: HR.EMPLOYEES（只读） <span class="x">✕</span></div></div>
     <div class="ptool" style="background:#252526">
-      <span class="tbi">📋 复制</span><span class="tbi">💾 另存为 .sql</span><span class="tbi">⟳ 重新获取</span>
+      <span class="tbi">📋 复制</span><span class="tbi">💾 另存为 .sql</span><span class="tbi">⟳ 重新获取</span><span class="tbi">🔗 F12 跳转定义 / Shift+F12 引用 / Ctrl+G 行</span>
       <span style="flex:1"></span><span class="gry" style="font-size:11.5px">来源：DBMS_METADATA.GET_DDL · STORAGE/引用完整性子句可开关</span>
     </div>
     <div class="editor" style="padding-top:6px">
@@ -586,7 +645,7 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
     </div>
   </div>
 </div>
-<p class="fig-cap">图 W-08c · DDL 以只读虚拟文档呈现（sqladmin-ddl: scheme），复用编辑器 SQL 高亮；过程/函数/包/触发器同页展示源码并支持「在新工作台中编辑」（F5-04）</p>
+<p class="fig-cap">图 W-08c · DDL 以只读虚拟文档呈现（sqladmin-ddl: scheme），复用编辑器 SQL 高亮；过程/函数/包/触发器同页展示源码并支持「在新工作台中编辑」；标识符支持 F12 跳转定义 / Shift+F12 查找引用（F2-14）（F5-04）</p>
 
 <!-- ============================================================ -->
 <h2 id="s8">8. PL/SQL 调试</h2>
@@ -605,6 +664,7 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
           <div style="padding-left:34px">▸ <span class="var-n">SAL</span> = <span class="var-v">950</span></div>
           <div style="padding-left:16px">▸ <span class="var-t">V_TAB</span> = <span class="var-v">TABLE(3)</span></div>
           <div>▸ <span class="var-n">监视</span></div>
+          <div class="gry" style="margin-top:8px;font-size:11px;border-top:1px solid #333;padding-top:6px">值随断点/单步自动刷新 · 右键：复制值 / 设置值（标量）</div>
         </div>
         <div class="hd2">调用栈</div>
         <div class="bd2">
@@ -628,6 +688,7 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
         <div class="edrow curline"><span class="ln">24</span><span class="gut"><span class="bp"></span></span><span><span class="cur">▶</span>      </span><span class="id">v_net</span><span class="tx"> := </span><span class="id">r.sal</span><span class="tx"> - </span><span class="fn">calc_tax</span><span class="tx">(</span><span class="id">r.sal</span><span class="tx">, </span><span class="id">v_rate</span><span class="tx">);</span></div>
         <div class="edrow"><span class="ln">25</span><span class="gut"></span><span class="tx">      </span><span class="id">v_total</span><span class="tx"> := </span><span class="id">v_total</span><span class="tx"> + </span><span class="id">v_net</span><span class="tx">;</span></div>
       </div>
+      <div class="datatip" style="right:16px;top:120px">💡 <span class="id">v_rate</span> · NUMBER = <span class="var-v">0.12</span><br><span class="gry" style="font-size:10.5px">悬停标识符显示即时值（DataTip）· Ctrl+点击跳转定义 · 右键复制值</span></div>
       <div class="panel" style="flex:1">
         <div class="ptabs"><div class="ptab on">调试控制台</div></div>
         <div class="console">
@@ -643,13 +704,13 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
     <span class="r"><span style="background:#6f42c1">🐞 调试中: calc_net(PL/SQL) · DEV-ORACLE</span><span>🗄️ DEV-ORACLE · HR</span></span>
   </div>
 </div>
-<p class="fig-cap">图 W-09 · 调试：原生 Debug UI（变量/调用栈/断点）+ 调试工具条（继续/单步跳入/跳过/跳出/停止）+ 调试控制台（F6-01..08）</p>
+<p class="fig-cap">图 W-09 · 调试：原生 Debug UI（变量/调用栈/断点）+ 变量即时值 DataTip + 调试工具条（继续/单步跳入/跳过/跳出/停止）+ 调试控制台（F6-01..08）</p>
 
 <div class="anno"><b>交互说明：</b>
 <ol>
   <li><b>启动</b>：F5 运行 <code>.vscode/launch.json</code> 中的 <code>"type": "sqladmin-plsql"</code> 配置（选择连接 + 目标程序单元 + 实参）；也可从对象树的过程节点右键「调试」。</li>
   <li><b>断点</b>：编辑器行首槽点击；适配器将其映射为 (OWNER, 单元名, 类型, 行号)，会话建立后统一验证并回显「已验证/失效」状态。</li>
-  <li><b>变量</b>：标量与复合类型（RECORD/TABLE）树形展开，懒加载子项；悬停源码中的变量显示即时值；标量支持右键「设置值」（S 级）。</li>
+  <li><b>变量值查看</b>：变量窗格显示标量与复合类型（RECORD/TABLE）的<b>当前值</b>，树形展开、子项懒加载；<b>悬停源码标识符弹出 DataTip 即时值</b>（图中 v_rate = 0.12）；右键复制值；标量「设置值」（S 级）。值随断点挂起/单步自动刷新（F6-05）。</li>
   <li><b>调用栈</b>：点击栈帧切换「当前帧」上下文，编辑器跳转到对应对象源码行（ALL_SOURCE 拉取只读视图）。</li>
   <li><b>停止/退出</b>：终止目标会话执行并 DETACH；被调试会话上的未提交事务提示处理方式。</li>
   <li><b>降级形态</b>（R1 预案）：若 DBMS_DEBUG PoC 不达标，此区域替换为「插桩调试」工作流——命令一键把选中块包上 DBMS_OUTPUT 变量打印，输出进调试控制台（F6-10）。</li>
@@ -767,8 +828,15 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
 
 <div class="note"><b>低保真 → 高保真演进：</b>本档线框确定布局、信息层级与交互规则；高保真阶段仅替换图标资产（codicons）与主题变量落位，不再调整结构。所有自绘界面在实现时必须通过深/浅两套主题截图评审（截图纳入 PR 检查单）。</div>
 
+<h3>修订记录</h3>
+<table class="grid">
+  <tr><th style="width:80px">版本</th><th style="width:110px">日期</th><th>说明</th></tr>
+  <tr><td>v0.1</td><td>2026-09-29</td><td>初稿</td></tr>
+  <tr><td>v0.2</td><td>2026-09-29</td><td>评审修订：① 修复 W-01/W-05 结果网格与 W-07 导出对话框排版（网格横向滚动容器、选项纵向分组）② W-02 新增连接模式与 TNS 别名 / tnsnames.ora 解析、保存用户名与密码 ③ W-06 提交/回滚按钮状态对照（空置灰 / 非空高亮计数）与断开默认回滚通知 ④ W-09 变量即时值 DataTip 与刷新说明 ⑤ W-04/W-08 面包屑、F12 跳转定义 / 引用、缩进格式化交互说明</td></tr>
+</table>
+
 <footer>
-  SQLAdmin 原型设计文档 v0.1 · 2026-09-29 · 仓库 <a href="https://github.com/Emon9426/SQLAdmin">github.com/Emon9426/SQLAdmin</a> ·
+  SQLAdmin 原型设计文档 v0.2 · 2026-09-29 · 仓库 <a href="https://github.com/Emon9426/SQLAdmin">github.com/Emon9426/SQLAdmin</a> ·
   上游输入：<a href="requirements.html">需求文档</a> · 本档通过设计评审后作为 UI 实现与验收依据
 </footer>
 </div>
