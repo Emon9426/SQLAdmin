@@ -75,11 +75,11 @@
   .tbi{padding:2px 7px;border-radius:3px;background:#333;color:#ccc;font-size:12px;white-space:nowrap}
   .tbi.gr{background:#2ea04366} .tbi.rd{background:#f8514955} .tbi.am{background:#e2b93d33}
   /* 数据网格 */
-  table.dg{border-collapse:collapse;width:100%;font-family:Consolas,"Courier New",monospace;font-size:12px}
-  .dg th{background:#333333;color:#ccc;border:1px solid #3c3c3c;border-bottom:2px solid #3c3c3c;padding:4px 10px;text-align:left;white-space:nowrap;position:relative}
+  table.dg{border-collapse:collapse;width:100%;table-layout:fixed;font-family:Consolas,"Courier New",monospace;font-size:12px}
+  .dg th{background:#333333;color:#ccc;border:1px solid #3c3c3c;border-bottom:2px solid #3c3c3c;padding:4px 8px;text-align:left;white-space:nowrap;position:relative;overflow:hidden;text-overflow:ellipsis}
   .dg th .k{color:#e2b93d;font-size:10px}
-  .dg td{border:1px solid #3c3c3c;padding:4px 10px;white-space:nowrap;color:#d4d4d4}
-  .dg tr.sel td{background:#04395e}
+  .dg td{border:1px solid #3c3c3c;padding:4px 8px;white-space:nowrap;color:#d4d4d4;overflow:hidden;text-overflow:ellipsis}
+  .dg tr.srow td{background:#04395e}
   .dg td.mod{background:#57450a;box-shadow:inset 2px 0 0 #e2b93d}
   .dg tr.ins td{background:#1e4620;box-shadow:inset 2px 0 0 #3fb950}
   .dg tr.del td{background:#5a1d1d;color:#999;text-decoration:line-through;box-shadow:inset 2px 0 0 #f85149}
@@ -260,8 +260,8 @@
         </div>
         <div class="dgwrap">
         <table class="dg">
-          <tr><th style="width:26px">·</th><th>EMPLOYEE_ID <span class="k">🔑</span></th><th>FIRST_NAME</th><th>LAST_NAME</th><th>DEPARTMENT_NAME</th><th>SALARY ▲</th><th>HIRE_DATE</th></tr>
-          <tr class="sel"><td>▸</td><td>206</td><td>William</td><td class="mod">Gietz-Wagner</td><td>Accounting</td><td class="mod">9,200.00</td><td>2007-06-07</td></tr>
+          <tr><th style="width:4%">·</th><th style="width:15%">EMPLOYEE_ID <span class="k">🔑</span></th><th style="width:13%">FIRST_NAME</th><th style="width:15%">LAST_NAME</th><th style="width:21%">DEPARTMENT_NAME</th><th style="width:14%">SALARY ▲</th><th style="width:18%">HIRE_DATE</th></tr>
+          <tr class="srow"><td>▸</td><td>206</td><td>William</td><td class="mod">Gietz-Wagner</td><td>Accounting</td><td class="mod">9,200.00</td><td>2007-06-07</td></tr>
           <tr><td></td><td>205</td><td>Shelley</td><td>Higgins</td><td>Accounting</td><td>12,008.00</td><td>2002-06-07</td></tr>
           <tr class="ins"><td>▸</td><td><i>（新）</i></td><td>Lin</td><td>Zhao</td><td>Sales</td><td>8,500.00</td><td class="nul">NULL</td></tr>
           <tr><td></td><td>204</td><td>Hermann</td><td class="nul">NULL</td><td>Sales</td><td>10,000.00</td><td>2021-05-11</td></tr>
@@ -435,8 +435,8 @@
     </div>
     <div class="dgwrap">
     <table class="dg">
-      <tr><th style="width:26px">·</th><th>EMPLOYEE_ID <span class="k">🔑</span></th><th>FIRST_NAME</th><th>LAST_NAME</th><th>DEPARTMENT_NAME</th><th>SALARY</th><th>HIRE_DATE</th><th>COMMISSION_PCT</th></tr>
-      <tr class="sel"><td>▸</td><td>206</td><td>William</td><td class="mod">Gietz-Wagner ✎</td><td>Accounting</td><td class="mod">9,200.00 ✎</td><td>2007-06-07</td><td class="nul">NULL</td></tr>
+      <tr><th style="width:4%">·</th><th style="width:13%">EMPLOYEE_ID <span class="k">🔑</span></th><th style="width:12%">FIRST_NAME</th><th style="width:14%">LAST_NAME</th><th style="width:18%">DEPARTMENT_NAME</th><th style="width:12%">SALARY</th><th style="width:13%">HIRE_DATE</th><th style="width:14%">COMMISSION_PCT</th></tr>
+      <tr class="srow"><td>▸</td><td>206</td><td>William</td><td class="mod">Gietz-Wagner ✎</td><td>Accounting</td><td class="mod">9,200.00 ✎</td><td>2007-06-07</td><td class="nul">NULL</td></tr>
       <tr><td></td><td>205</td><td>Shelley</td><td>Higgins</td><td>Accounting</td><td>12,008.00</td><td>2002-06-07</td><td class="nul">NULL</td></tr>
       <tr class="ins"><td>▸</td><td><i>（自动/手输）</i></td><td>Lin</td><td>Zhao</td><td>Sales</td><td class="err">8,5O0.00 ✗</td><td class="nul">NULL</td><td>0.15</td></tr>
       <tr><td></td><td>204</td><td>Hermann</td><td class="nul">NULL</td><td>Sales</td><td>10,000.00</td><td>2021-05-11</td><td class="nul">NULL</td></tr>
@@ -611,7 +611,7 @@ Gietz-Wagner<span class="cm">   -- 光标在此，可直接修改；ESC 取消�
     </div>
     <div class="dgwrap">
     <table class="dg">
-      <tr><th>列名</th><th>数据类型</th><th>可空</th><th>默认值</th><th>注释</th></tr>
+      <tr><th style="width:18%">列名</th><th style="width:16%">数据类型</th><th style="width:13%">可空</th><th style="width:13%">默认值</th><th style="width:40%">注释</th></tr>
       <tr><td>EMPLOYEE_ID 🔑</td><td>NUMBER(6,0)</td><td class="nul">NOT NULL</td><td class="nul">NULL</td><td>主键，员工编号</td></tr>
       <tr><td>FIRST_NAME</td><td>VARCHAR2(20)</td><td class="nul">NULL</td><td class="nul">NULL</td><td>名</td></tr>
       <tr><td>HIRE_DATE</td><td>DATE</td><td class="nul">NOT NULL</td><td>SYSDATE</td><td>入职日期</td></tr>
