@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQLAdmin 需求文档（含可行性分析）v0.1</title>
+<style>
+  :root{
+    --ink:#1f2328; --sub:#57606a; --line:#d0d7de; --bg:#ffffff; --soft:#f6f8fa;
+    --blue:#0969da; --bluebg:#ddf4ff; --red:#cf222e; --redbg:#ffebe9;
+    --amber:#9a6700; --amberbg:#fff8c5; --green:#116329; --greenbg:#dafbe1;
+    --gray:#57606a; --graybg:#eaeef2;
+  }
+  *{box-sizing:border-box}
+  body{font-family:"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;color:var(--ink);background:var(--bg);margin:0;line-height:1.75;font-size:15px}
+  .wrap{max-width:1100px;margin:0 auto;padding:36px 44px 60px}
+  header.hero{border-bottom:3px solid #0b63ce;padding-bottom:18px;margin-bottom:24px}
+  header.hero h1{margin:0 0 4px;font-size:30px}
+  header.hero .sub{color:var(--sub);margin:0 0 14px;font-size:16px}
+  table.meta{width:auto;border-collapse:collapse;font-size:14px}
+  table.meta th,table.meta td{border:1px solid var(--line);padding:4px 14px}
+  table.meta th{background:var(--soft);text-align:right;white-space:nowrap}
+  h2{font-size:22px;margin:2.4em 0 .6em;border-left:5px solid #0b63ce;padding-left:12px}
+  h3{font-size:18px;margin:1.8em 0 .5em}
+  h4{font-size:15.5px;margin:1.4em 0 .4em}
+  p{margin:.6em 0}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+  table.grid{border-collapse:collapse;width:100%;font-size:13.5px;margin:12px 0}
+  table.grid th{background:#eef2f7;text-align:left}
+  table.grid th,table.grid td{border:1px solid var(--line);padding:6px 10px;vertical-align:top}
+  table.grid tr:nth-child(even) td{background:#fbfcfe}
+  .tag{display:inline-block;padding:0 9px;border-radius:11px;font-size:12px;font-weight:600;white-space:nowrap;line-height:20px}
+  .m{background:var(--redbg);color:var(--red)}
+  .s{background:var(--amberbg);color:var(--amber)}
+  .c{background:var(--greenbg);color:var(--green)}
+  .w{background:var(--graybg);color:var(--gray)}
+  .ok{background:var(--greenbg);color:var(--green)}
+  .bad{background:var(--redbg);color:var(--red)}
+  .note{background:var(--bluebg);border-left:4px solid var(--blue);padding:10px 16px;margin:14px 0;border-radius:0 6px 6px 0;font-size:14px}
+  .warn{background:var(--amberbg);border-left:4px solid var(--amber);padding:10px 16px;margin:14px 0;border-radius:0 6px 6px 0;font-size:14px}
+  .toc{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:16px 28px;margin-bottom:10px}
+  .toc h2{border:none;margin:0 0 8px;padding:0;font-size:17px}
+  .toc ol{margin:0;padding-left:22px;column-count:2;column-gap:40px}
+  .toc li{margin:2px 0}
+  code{background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:0 5px;font-family:Consolas,"Courier New",monospace;font-size:13px}
+  pre{background:#0d1117;color:#e6edf3;padding:14px 18px;border-radius:8px;overflow:auto;font-size:13px;line-height:1.6}
+  pre code{background:none;border:none;color:inherit}
+  kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:12px;background:var(--soft);font-family:Consolas,monospace}
+  .arch{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+  .arch .layer{border:1px solid var(--line);border-radius:8px;padding:10px 16px;background:var(--soft)}
+  .arch .layer b{display:inline-block;min-width:150px}
+  .arch .pill{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:14px;padding:0 10px;margin:2px 3px;font-size:12.5px;line-height:22px}
+  .risk-high{color:var(--red);font-weight:700}
+  .risk-mid{color:var(--amber);font-weight:700}
+  .risk-low{color:var(--green);font-weight:700}
+  footer{margin-top:48px;border-top:1px solid var(--line);padding-top:14px;color:var(--sub);font-size:13px}
+  .fig-cap{font-size:13px;color:var(--sub);text-align:center;margin:4px 0 16px}
+  @media print{.toc{display:none} body{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>SQLAdmin 需求文档</h1>
+  <p class="sub">含开源可行性分析与许可证合规评估 · Oracle 数据库 VS Code 插件</p>
+  <table class="meta">
+    <tr><th>项目</th><td>SQLAdmin —— VS Code Oracle 数据库开发插件（对标 Oracle SQL Developer 核心功能）</td></tr>
+    <tr><th>仓库</th><td><a href="https://github.com/Emon9426/SQLAdmin">https://github.com/Emon9426/SQLAdmin</a></td></tr>
+    <tr><th>文档版本</th><td>v0.1（草案）</td></tr>
+    <tr><th>日期</th><td>2026-09-29</td></tr>
+    <tr><th>状态</th><td>需求评审中 · 配套文档：<a href="prototype-design.html">原型设计文档</a></td></tr>
+  </table>
+</header>
+
+<nav class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#s1">引言</a></li>
+    <li><a href="#s2">项目背景与目标</a></li>
+    <li><a href="#s3">可行性分析（技术 / 版权 / 风险）</a></li>
+    <li><a href="#s4">用户角色与典型场景</a></li>
+    <li><a href="#s5">功能需求（F1–F8）</a></li>
+    <li><a href="#s6">非功能需求</a></li>
+    <li><a href="#s7">版本规划与里程碑</a></li>
+    <li><a href="#s8">测试与验收策略</a></li>
+    <li><a href="#s9">附录：竞品对照 / 组件清单 / 参考链接</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="s1">1. 引言</h2>
+
+<h3>1.1 目的与范围</h3>
+<p>本文档定义 SQLAdmin 的产品需求，并给出基于<b>版权合规开源组件</b>的可行性分析结论。SQLAdmin 是一个 VS Code 插件，目标用户通过它连接 Oracle 数据库完成日常开发工作：<b>增删改查（CRUD）、导出查询结果、在结果网格中直接编辑数据并提交/回滚、浏览数据库对象、调试 PL/SQL 代码</b>，并为 PostgreSQL 支持预留扩展点。</p>
+<p>本文档同时作为后续 <a href="prototype-design.html">原型设计文档</a> 与开发排期的输入。功能范围以 SQL Developer 的「日常开发使用集」为对照基线，<b>不</b>覆盖 DBA 运维类能力（备份恢复、性能监控、数据建模/ER 图等）。</p>
+
+<h3>1.2 术语表</h3>
+<table class="grid">
+  <tr><th style="width:160px">术语</th><th>说明</th></tr>
+  <tr><td>Thin / Thick 模式</td><td>node-oracledb 的两种运行模式：thin 为纯 JavaScript 实现（默认，免装 Oracle 客户端，支持 Oracle DB 12.1+）；thick 需加载 Oracle Client 库（19+），支持 Oracle DB 11.2+ 及部分高级特性。</td></tr>
+  <tr><td>ROWID</td><td>Oracle 行物理地址，用于结果编辑时唯一定位行并生成 UPDATE/DELETE 语句。</td></tr>
+  <tr><td>延迟行锁</td><td>编辑某行时才对该行执行 <code>SELECT ... FOR UPDATE</code>（按 ROWID），避免打开数据即长时间持锁——与 SQL Developer 行为对齐。</td></tr>
+  <tr><td>DBMS_OUTPUT</td><td>Oracle 服务端 PL/SQL 标准输出通道，工作台执行后自动回收显示。</td></tr>
+  <tr><td>DBMS_METADATA</td><td>Oracle 服务端包，<code>GET_DDL</code> 用于获取对象 DDL。</td></tr>
+  <tr><td>DBMS_DEBUG / DBMS_DEBUG_JDWP</td><td>Oracle 服务端调试接口：前者为经典 Probe 接口（12.2 起标记弃用但仍保留）；后者为 JDWP（Java Debug Wire Protocol）方式，SQL Developer / Toad 等采用。</td></tr>
+  <tr><td>DAP</td><td>Debug Adapter Protocol，VS Code 调试协议；本插件自研 PL/SQL 调试适配器需实现该协议。</td></tr>
+  <tr><td>工作台（Worksheet）</td><td>SQLAdmin 中一个 SQL 编辑器标签页，绑定一个数据库会话（连接），拥有独立事务上下文。</td></tr>
+  <tr><td>变更集（Changeset）</td><td>结果网格中未提交的单元格修改、新增行、删除行的集合，可预览生成的 DML，随事务 COMMIT/ROLLBACK。</td></tr>
+</table>
+
+<h3>1.3 参考文档</h3>
+<ul>
+  <li>node-oracledb 官方文档：<a href="https://node-oracledb.readthedocs.io/">node-oracledb readthedocs</a> / <a href="https://github.com/oracle/node-oracledb">GitHub</a></li>
+  <li>VS Code Extension API：<a href="https://code.visualstudio.com/api">https://code.visualstudio.com/api</a>；Debug Adapter Protocol：<a href="https://microsoft.github.io/debug-adapter-protocol/">microsoft.github.io/debug-adapter-protocol</a></li>
+  <li>Oracle PL/SQL Packages Reference（DBMS_OUTPUT / DBMS_METADATA / DBMS_DEBUG / DBMS_DEBUG_JDWP）：<a href="https://docs.oracle.com/en/database/oracle/oracle-database/">docs.oracle.com</a></li>
+  <li>SQL Developer 用户指南（仅作功能对照，严禁复用其实现）：<a href="https://docs.oracle.com/en/sqldeveloper/">SQL Developer docs</a></li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s2">2. 项目背景与目标</h2>
+
+<h3>2.1 背景与机会</h3>
+<ul>
+  <li><b>SQL Developer 是多数 Oracle 开发者的默认工具</b>，但它基于独立 Java 桌面技术栈，与现代代码工作流（VS Code、Git、AI 辅助编程）割裂。</li>
+  <li><b>Oracle 官方 VS Code 插件（Oracle.oracledevtools）免费但闭源</b>，功能以连接、SQL 执行、对象浏览、自治库向导为主，未见开放的 PL/SQL 调试能力，且不可定制、不可二次开发。</li>
+  <li><b>开源生态缺口</b>：SQLTools（MIT）提供了连接管理框架但无成熟的 Oracle 驱动与数据编辑能力；DBeaver（Apache-2.0）功能完整但是 Java/Eclipse 桌面形态；社区中<b>不存在成熟的 PL/SQL 调试 VS Code 适配器</b>（本次调研结论，见 §3.2）。</li>
+  <li><b>关键使能技术已就绪</b>：node-oracledb 6+ 的 thin 模式以 Apache-2.0/UPL-1.0 双许可开源、纯 JavaScript 实现 Oracle 网络协议，用户<b>无需安装 Oracle 客户端</b>即可连接 Oracle 12.1+——这是本插件可行的技术前提。</li>
+</ul>
+
+<h3>2.2 产品目标</h3>
+<ol>
+  <li>让 Oracle 开发者在 VS Code 内完成 SQL Developer 的日常核心工作：查询、结果编辑与提交/回滚、导出、对象浏览、PL/SQL 调试。</li>
+  <li>零客户端安装的连接体验（thin 模式），同时保留 thick 模式兼容 11.2+ 老库。</li>
+  <li>完全遵循 VS Code 工作台交互惯例（命令面板、快捷键、主题变量），深浅色主题自适应。</li>
+  <li>架构上以「驱动抽象 + 方言抽象」预留 PostgreSQL（及未来其他数据库）的接入能力。</li>
+  <li>全链路版权合规：不使用任何专有软件代码/资产；所有第三方依赖可商用、可再分发。</li>
+</ol>
+
+<h3>2.3 范围外（Out of Scope）</h3>
+<ul>
+  <li>DBA 运维功能：备份恢复、AWR/性能报告、表空间管理、RMAN、Data Pump UI。</li>
+  <li>数据建模 / ER 图 / 正向逆向工程。</li>
+  <li>Oracle NoSQL / MySQL / SQL Server 等其他数据库（仅预留 PostgreSQL）。</li>
+  <li>PL/SQL 单元测试框架集成（utPLSQL）列为可选项（C 级），不在首发范围。</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s3">3. 可行性分析</h2>
+
+<h3>3.1 竞品与生态调研</h3>
+<table class="grid">
+  <tr><th style="width:150px">工具</th><th style="width:90px">形态</th><th style="width:110px">许可证</th><th>关键能力</th><th>对本项目的意义</th></tr>
+  <tr>
+    <td>Oracle SQL Developer</td><td>Java 桌面</td><td><span class="tag bad">专有（免费）</span></td>
+    <td>功能全集：查询、结果编辑、导出、对象浏览、PL/SQL 调试（JDWP）</td>
+    <td><b>仅作功能对照基线</b>，严禁复用代码、图标、文案等任何资产</td>
+  </tr>
+  <tr>
+    <td>Oracle Developer Tools for VS Code</td><td>VS Code 插件</td><td><span class="tag bad">闭源免费</span></td>
+    <td>连接、SQL 执行、对象浏览、自治库向导；无开放 PL/SQL 调试</td>
+    <td>证明需求真实存在；闭源不可复用，差异化点=结果编辑+调试</td>
+  </tr>
+  <tr>
+    <td>PL/SQL Developer / Toad</td><td>Windows 桌面</td><td><span class="tag bad">商业</span></td>
+    <td>完整 PL/SQL IDE，Probe/JDWP 双调试方式（PL/SQL Developer 仍支持 DBMS_DEBUG Probe）</td>
+    <td>证明 DBMS_DEBUG 路线工程上仍可行；仅参考行为，不接触实现</td>
+  </tr>
+  <tr>
+    <td>SQLTools</td><td>VS Code 插件</td><td><span class="tag ok">MIT</span></td>
+    <td>连接管理框架 + 多数据库驱动（MySQL/PG/MSSQL/SQLite）；无成熟 Oracle 驱动、无结果编辑/调试</td>
+    <td>连接管理 UI 范式与驱动注册架构可参考或按需局部复用（保留版权声明）</td>
+  </tr>
+  <tr>
+    <td>DBeaver Community</td><td>Eclipse 桌面（Java）</td><td><span class="tag ok">Apache-2.0</span></td>
+    <td>驱动抽象、元数据模型、结果编辑、事务管理的成熟参考</td>
+    <td>架构参考（Java 技术栈不可直接嵌入 VS Code，不复制其代码边界内的工作按需评估）</td>
+  </tr>
+  <tr>
+    <td>utPLSQL + 其 VS Code 插件</td><td>DB 端框架 / 插件</td><td><span class="tag ok">Apache-2.0</span></td>
+    <td>PL/SQL 单元测试，其 VS Code 插件验证了 node-oracledb thin 模式在插件内直连 Oracle 的可行性</td>
+    <td>技术路线佐证；可选后续集成（C 级）</td>
+  </tr>
+</table>
+
+<h3>3.2 技术可行性（分层结论）</h3>
+<div class="arch">
+  <div class="layer"><b>UI 层（VS Code）</b>
+    <span class="pill">TreeView（连接树/对象树）</span><span class="pill">TextEditor + TextMate（SQL/PLSQL 高亮）</span><span class="pill">WebviewPanel（结果网格/单元格查看器）</span><span class="pill">Debug UI（断点/变量/调用栈）</span><span class="pill">StatusBarItem（连接与事务状态）</span><span class="pill">SecretStorage（凭据）</span>
+  </div>
+  <div class="layer"><b>调试层</b>
+    <span class="pill">自研 DAP 适配器（vscode-debugadapter, MIT）</span><span class="pill">DBMS_DEBUG Probe 控制器（方案 A）</span><span class="pill">JDWP 客户端预研（方案 B）</span>
+  </div>
+  <div class="layer"><b>执行与导出层</b>
+    <span class="pill">语句切分器（自研，处理 PL/SQL 块/注释/引号）</span><span class="pill">流式 Resultset（rs.getRows 分批）</span><span class="pill">connection.break() 取消执行</span><span class="pill">CSV/XLSX(exceljs)/JSON/INSERT/HTML writers（流式）</span>
+  </div>
+  <div class="layer"><b>会话与事务层</b>
+    <span class="pill">每工作台独立会话（事务隔离）</span><span class="pill">空闲会话超时回收</span><span class="pill">变更集管理（pending DML）</span><span class="pill">延迟行锁（ROWID + FOR UPDATE）</span>
+  </div>
+  <div class="layer"><b>元数据层</b>
+    <span class="pill">数据字典缓存（ALL_/USER_/DBA_ 视图）</span><span class="pill">DBMS_METADATA.GET_DDL</span><span class="pill">补全元数据索引（表/列/别名解析）</span>
+  </div>
+  <div class="layer"><b>驱动抽象层（IDbDriver）</b>
+    <span class="pill">OracleDriver：oracledb thin（默认）/ thick（可选）</span><span class="pill">PostgresDriver：pg（预留，M5 实装）</span><span class="pill">能力位（capabilities）+ 方言（DDL/元数据/分页）</span>
+  </div>
+</div>
+
+<table class="grid">
+  <tr><th style="width:110px">能力</th><th style="width:190px">技术方案</th><th>可行性结论</th></tr>
+  <tr><td>连接 Oracle</td><td>node-oracledb thin（默认，免客户端，12.1+）；thick 可选（11.2+）</td><td><b>可行（低风险）</b>。thin 模式为纯 JS 实现的 Oracle Net 协议，已在 utPLSQL VS Code 插件等项目中验证。</td></tr>
+  <tr><td>增删改查执行</td><td><code>connection.execute</code>，多条语句自研切分器；DDL/DML/DQL 统一执行器</td><td><b>可行（低风险）</b>。切分器需处理 PL/SQL 块嵌套、注释、引号，属已知工程问题。</td></tr>
+  <tr><td>大结果集</td><td><code>execute(..., {resultSet:true})</code> + <code>getRows(batch)</code> 分批拉取；网格虚拟滚动；导出全程流式</td><td><b>可行（低风险）</b>。</td></tr>
+  <tr><td>取消执行</td><td><code>connection.break()</code></td><td><b>可行</b>。仅对进行中的数据库调用有效，UI 需配合可取消进度。</td></tr>
+  <tr><td>结果内编辑</td><td>ROWID 定位 + 延迟行锁 + 变更集 → 生成绑定变量 DML → COMMIT/ROLLBACK</td><td><b>可行（中风险）</b>。需精细处理并发冲突（ORA-00054 等）与类型校验，行为对标 SQL Developer。</td></tr>
+  <tr><td>导出</td><td>CSV/JSON/INSERT/HTML 自研 writer；XLSX 用 exceljs 流式 WorkbookWriter</td><td><b>可行（低风险）</b>。</td></tr>
+  <tr><td>对象浏览</td><td>数据字典视图 + DBMS_METADATA.GET_DDL；权限自适应（无 DBA_ 权限回退 ALL_/USER_）</td><td><b>可行（低风险）</b>。</td></tr>
+  <tr><td>执行计划</td><td>EXPLAIN PLAN + DBMS_XPLAN.DISPLAY（预估计划）；v$session/v$sql_plan 实际计划（需权限，S 级）</td><td><b>可行</b>。实际计划依赖权限，需降级提示。</td></tr>
+  <tr><td>PL/SQL 调试</td><td><b>方案 A</b>：自研 DAP 适配器驱动 DBMS_DEBUG（Probe：INITIALIZE/ATTACH/SET_BREAKPOINT/CONTINUE/GET_RUNTIME_INFO/GET_VALUE/GET_STACK）；<b>方案 B</b>：实现 Oracle 定制 JDWP 客户端对接 DBMS_DEBUG_JDWP</td><td><b>可行但为本项目最高风险项</b>。开源界无现成实现（本次调研确认）；方案 A 的服务端 API 稳定可用（PL/SQL Developer 仍在使用），但自 12.2 标记弃用；方案 B 协议资料有限。策略：M4 先做方案 A 的 PoC（断点/单步/标量变量/调用栈），同步预研方案 B，PoC 不达标则降级交付（见 §3.4 R1）。</td></tr>
+  <tr><td>PostgreSQL 预留</td><td>IDbDriver 接口 + pg 驱动（MIT）+ 方言层（pg_catalog 元数据、DDL 获取）</td><td><b>可行（低风险）</b>。核心在于前期接口纪律：元数据、DML 生成、分页、DDL 全部走方言层。</td></tr>
+</table>
+
+<h3>3.3 版权与许可证合规矩阵</h3>
+<p>原则：<b>只引入 OSI 认可的可商用、可再分发开源许可证组件；任何专有软件只允许作为行为参考，不接触其代码、资源与产物。</b></p>
+
+<h4>（一）计划引入的开源组件</h4>
+<table class="grid">
+  <tr><th style="width:150px">组件</th><th style="width:130px">许可证</th><th style="width:170px">用途</th><th>合规结论与义务</th></tr>
+  <tr><td><a href="https://github.com/oracle/node-oracledb">oracledb</a>（node-oracledb 6+）</td><td>Apache-2.0 OR UPL-1.0（任选）</td><td>Oracle 驱动（thin/thick）</td><td><span class="tag ok">可用</span> 允许商用与再分发；保留 LICENSE 与 NOTICE 声明</td></tr>
+  <tr><td><a href="https://github.com/brianc/node-postgres">pg</a></td><td>MIT</td><td>PostgreSQL 驱动（M5）</td><td><span class="tag ok">可用</span> 保留版权声明</td></tr>
+  <tr><td><a href="https://github.com/mtxr/vscode-sqltools">SQLTools</a>（按需局部参考/复用）</td><td>MIT</td><td>连接管理 UI/驱动注册范式</td><td><span class="tag ok">可用</span> 若复制代码须保留其版权声明；建议优先仅作架构参考</td></tr>
+  <tr><td><a href="https://github.com/exceljs/exceljs">exceljs</a></td><td>MIT</td><td>XLSX 流式导出</td><td><span class="tag ok">可用</span></td></tr>
+  <tr><td><a href="https://github.com/sql-formatter-org/sql-formatter">sql-formatter</a></td><td>MIT</td><td>SQL 格式化（支持 plsql 方言）</td><td><span class="tag ok">可用</span></td></tr>
+  <tr><td><a href="https://github.com/microsoft/vscode-debugadapter-node">vscode-debugadapter</a></td><td>MIT</td><td>DAP 适配器基座</td><td><span class="tag ok">可用</span></td></tr>
+  <tr><td><a href="https://github.com/microsoft/vscode-codicons">vscode-codicons</a></td><td>MIT</td><td>图标库</td><td><span class="tag ok">可用</span> 便于与 VS Code 视觉一致</td></tr>
+  <tr><td>结果网格</td><td>—</td><td>Webview 虚拟滚动表格</td><td><b>自研</b>（首选，零依赖、体积小）；备选 ag-grid-community（MIT，需保留声明并锁定 community 版，注意其企业版功能不可用）</td></tr>
+  <tr><td>SQL 语法文法</td><td>—</td><td>TextMate 高亮 / 语句切分</td><td><b>自研</b>；<a href="https://github.com/taozhi8833998/node-sql-parser">node-sql-parser</a>（Apache-2.0，引入前复核最新版许可证与 Oracle 支持度）仅作辅助 AST</td></tr>
+</table>
+
+<h4>（二）禁止接触与仅参考对象</h4>
+<table class="grid">
+  <tr><th style="width:230px">对象</th><th>许可证性质</th><th>处理方式</th></tr>
+  <tr><td>Oracle SQL Developer</td><td><span class="tag bad">专有软件</span></td><td>仅以其公开用户指南作功能对照；<b>禁止</b>反编译、复用代码/图标/文案/布局素材</td></tr>
+  <tr><td>Oracle Developer Tools for VS Code（oracledevtools）</td><td><span class="tag bad">闭源免费</span></td><td>不可复用任何实现；可作为功能差异化的竞品观察对象</td></tr>
+  <tr><td>Oracle JDBC / ODBC 驱动</td><td><span class="tag bad">OTN 许可（限制再分发）</span></td><td><b>规避</b>：不做 Java sidecar 架构，调试方案不依赖 JDBC（这也是放弃 JDWP-over-JDBC、优先 DBMS_DEBUG 的原因之一）</td></tr>
+  <tr><td>PL/SQL Developer / Toad</td><td><span class="tag bad">商业软件</span></td><td>仅作交互行为参考</td></tr>
+</table>
+<div class="note"><b>合规流程要求：</b>建立 <code>THIRD_PARTY_NOTICES.md</code> 清单制度；每次新增依赖必须在本矩阵登记许可证并在 CI 中校验（可引入 license-checker 类工具）；项目自身许可证建议采用 Apache-2.0（最终由维护者定夺）。</div>
+
+<h3>3.4 风险登记册</h3>
+<table class="grid">
+  <tr><th style="width:48px">ID</th><th style="width:210px">风险</th><th style="width:70px">等级</th><th>缓解措施</th></tr>
+  <tr><td>R1</td><td>PL/SQL 调试复杂度高：DBMS_DEBUG 已标记弃用（12.2+），JDWP 资料有限，且无开源先例</td><td class="risk-high">高</td><td>M4 先行 PoC（2 周盒内验证断点/单步/变量）；PoC 不达标则降级交付「日志增强调试」（DBMS_OUTPUT 自动插桩 + utPLSQL 断言），调试完整版顺延；JDWP 路线并行预研</td></tr>
+  <tr><td>R2</td><td>thin 模式能力边界：11.2 老库、部分企业认证（Kerberos 等）与高级特性不在覆盖内</td><td class="risk-mid">中</td><td>提供 thick 模式开关（用户自备 Oracle Client）；文档明示各模式支持矩阵</td></tr>
+  <tr><td>R3</td><td>大结果集内存/性能（网格与导出）</td><td class="risk-mid">中</td><td>默认分批拉取（500 行/批，可配）+ 虚拟滚动 + 流式导出；设置最大预取上限</td></tr>
+  <tr><td>R4</td><td>语句切分器边界情况（PL/SQL 块、动态 SQL、注释内分号）</td><td class="risk-mid">中</td><td>自研状态机切分器 + 系统化语料测试集；提供「仅执行选中」逃生通道</td></tr>
+  <tr><td>R5</td><td>凭据安全（连接密码）</td><td class="risk-mid">中</td><td>仅存 VS Code SecretStorage；连接配置导出时强制脱敏；只读连接选项</td></tr>
+  <tr><td>R6</td><td>结果编辑并发冲突（行锁失败 ORA-00054、数据已被他人修改）</td><td class="risk-mid">中</td><td>延迟行锁缩小锁窗口；提交前变更集预览；冲突行标红并提示重查</td></tr>
+  <tr><td>R7</td><td>VS Code API / node-oracledb 版本演进</td><td class="risk-low">低</td><td>锁定引擎最低版本（vscode ^1.85+）；依赖升级纳入季度例行</td></tr>
+  <tr><td>R8</td><td>团队对 Oracle 内部机制（数据字典、调试接口）经验不足</td><td class="risk-low">低</td><td>风险前置：M1 即建立 gvenzl/oracle-free 容器化集成测试环境，持续积累语料</td></tr>
+</table>
+
+<h3>3.5 总体结论</h3>
+<div class="note">
+<p><b>可行，建议立项。</b>连接、CRUD 执行、结果展示与编辑、导出、对象浏览五类核心功能均有 Apache-2.0/MIT/UPL 级别的合规开源基座（核心为 node-oracledb thin 模式），工程上均为成熟模式，风险可控。</p>
+<p><b>唯一的高风险项是 PL/SQL 调试</b>：开源界无现成 DAP 适配器（本报告调研确认），需基于 DBMS_DEBUG（方案 A）自研，并以 JDWP（方案 B）作为演进路线。采用「PoC 先行 + 降级预案」策略后，整体项目风险可接受。</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s4">4. 用户角色与典型场景</h2>
+
+<h3>4.1 用户角色</h3>
+<table class="grid">
+  <tr><th style="width:130px">角色</th><th>描述</th><th style="width:280px">核心诉求</th></tr>
+  <tr><td>后端/ETL 开发工程师（主要）</td><td>日常写 SQL 与 PL/SQL，从 SQL Developer 迁移而来</td><td>快速执行、改数据、导数据、调试存储过程</td></tr>
+  <tr><td>DBA（次要）</td><td>多套环境巡检、对象核查</td><td>多连接管理、对象浏览、DDL 核查、只读保护</td></tr>
+  <tr><td>数据分析师（次要）</td><td>以查询与导出为主</td><td>大结果集流畅、导出 Excel、格式友好</td></tr>
+</table>
+
+<h3>4.2 用户故事（User Stories）</h3>
+<table class="grid">
+  <tr><th style="width:70px">编号</th><th>故事</th><th>验收要点</th></tr>
+  <tr><td>US-01</td><td>作为开发，我能新建 Oracle 连接（仅主机/端口/服务名/账号），测试连通后保存，密码不明文落盘。</td><td>密码仅存 SecretStorage；settings 导出的连接不含密码</td></tr>
+  <tr><td>US-02</td><td>作为开发，我能在工作台执行选中的 SQL，多语句执行时每个结果集一个标签页。</td><td>Ctrl+Enter 执行当前语句；多结果集按序分标签</td></tr>
+  <tr><td>US-03</td><td>作为开发，我能在结果网格中直接改单元格、增删行，预览将执行的 DML，再统一提交或回滚。</td><td>脏单元格/新增行/删除行有明确视觉标记；提交前可预览 SQL；回滚清空变更集</td></tr>
+  <tr><td>US-04</td><td>作为分析，我能把查询结果全量导出为 XLSX/CSV/JSON/INSERT，不受网格已加载行数限制。</td><td>100 万行级导出为流式、内存有上界、进度可取消</td></tr>
+  <tr><td>US-05</td><td>作为开发，我能在对象树中查看表结构、注释、索引、约束与 DDL，并一键打开表数据。</td><td>DDL 由 DBMS_METADATA 生成；表数据打开进入可编辑网格</td></tr>
+  <tr><td>US-06</td><td>作为开发，我能在存储过程里打断点、单步执行、查看变量与调用栈，定位逻辑错误。</td><td>断点命中即挂起；变量可展开复合类型；调试不影响其他工作台会话</td></tr>
+  <tr><td>US-07</td><td>作为 DBA，我能为生产连接开启只读模式，防止误改。</td><td>只读连接下网格禁用编辑、DML 执行前拦截确认</td></tr>
+  <tr><td>US-08</td><td>作为开发，未来团队切换 PostgreSQL 时，插件可平滑加装 pg 支持。</td><td>驱动接口（IDbDriver）稳定，连接 UI 类型下拉已预留</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="s5">5. 功能需求</h2>
+<p>优先级采用 MoSCoW：<span class="tag m">M 必须</span> <span class="tag s">S 应该</span> <span class="tag c">C 可以</span> <span class="tag w">W 暂缓</span>。</p>
+
+<h3>5.1 F1 连接管理</h3>
+<table class="grid">
+  <tr><th style="width:70px">编号</th><th style="width:200px">需求</th><th style="width:64px">优先级</th><th>说明与验收要点</th></tr>
+  <tr><td>F1-01</td><td>新建/编辑/删除/复制连接</td><td><span class="tag m">M</span></td><td>字段：名称、类型（Oracle；PostgreSQL 预留置灰）、主机、端口(默认1521)、服务名/SID、用户名、密码、角色（DEFAULT/SYSDBA/SYSOPER）</td></tr>
+  <tr><td>F1-02</td><td>测试连接</td><td><span class="tag m">M</span></td><td>表单内一键测试，返回成功/失败与错误码（ORA-xxx）</td></tr>
+  <tr><td>F1-03</td><td>密码安全存储</td><td><span class="tag m">M</span></td><td>VS Code SecretStorage；可选「不保存密码，连接时询问」</td></tr>
+  <tr><td>F1-04</td><td>连接树与状态</td><td><span class="tag m">M</span></td><td>侧边栏树展示已保存连接；状态徽标：已连接（绿）/连接中（转圈）/断开/错误；单连接可多会话（每工作台一个）</td></tr>
+  <tr><td>F1-05</td><td>Easy Connect / TNS 别名</td><td><span class="tag s">S</span></td><td>支持连接串模式与 tnsnames.ora 别名（thin 模式内建支持）</td></tr>
+  <tr><td>F1-06</td><td>只读连接开关</td><td><span class="tag s">S</span></td><td>连接级配置；开启后禁用网格编辑与 DML（US-07）</td></tr>
+  <tr><td>F1-07</td><td>thick 模式开关</td><td><span class="tag s">S</span></td><td>连接级或全局指定 Oracle Client 路径（11.2+ 兼容，R2）</td></tr>
+  <tr><td>F1-08</td><td>连接分组/颜色标签</td><td><span class="tag c">C</span></td><td>环境分组（DEV/TEST/PROD）与颜色标识，防误连</td></tr>
+  <tr><td>F1-09</td><td>连接配置导入导出</td><td><span class="tag c">C</span></td><td>JSON 导出强制脱敏（不含密码）</td></tr>
+</table>
+
+<h3>5.2 F2 SQL 工作台</h3>
+<table class="grid">
+  <tr><th style="width:70px">编号</th><th style="width:200px">需求</th><th style="width:64px">优先级</th><th>说明与验收要点</th></tr>
+  <tr><td>F2-01</td><td>新建工作台</td><td><span class="tag m">M</span></td><td>命令/连接树右键新建；工作台绑定一个数据库会话；标题显示「连接 · schema」</td></tr>
+  <tr><td>F2-02</td><td>执行当前语句（Ctrl+Enter）</td><td><span class="tag m">M</span></td><td>依据光标位置切分定位语句；有选区时执行选区原文</td></tr>
+  <tr><td>F2-03</td><td>多语句/脚本执行</td><td><span class="tag m">M</span></td><td>逐句执行；每个结果集独立标签；脚本输出汇总（每句耗时、影响行数、错误继续/中止选项）</td></tr>
+  <tr><td>F2-04</td><td>结果集展示</td><td><span class="tag m">M</span></td><td>列头来自元数据；分批拉取+虚拟滚动；NULL 特殊显示；底部行数/耗时/继续获取</td></tr>
+  <tr><td>F2-05</td><td>取消执行</td><td><span class="tag s">S</span></td><td><code>connection.break()</code>；进度通知可取消</td></tr>
+  <tr><td>F2-06</td><td>DBMS_OUTPUT 面板</td><td><span class="tag m">M</span></td><td>自动 ENABLE，执行后自动 GET_LINES 回显；缓冲上限可配</td></tr>
+  <tr><td>F2-07</td><td>错误定位</td><td><span class="tag s">S</span></td><td>利用 <code>errorOffset</code> 将光标跳到出错位置，错误消息悬浮提示</td></tr>
+  <tr><td>F2-08</td><td>绑定变量</td><td><span class="tag s">S</span></td><td>识别 <code>:name</code>，执行前弹出赋值框（记住上次值，按会话缓存）</td></tr>
+  <tr><td>F2-09</td><td>语法高亮与括号/折叠</td><td><span class="tag m">M</span></td><td>自研 TextMate 文法（SQL/PLSQL language contribution）</td></tr>
+  <tr><td>F2-10</td><td>智能补全</td><td><span class="tag s">S</span></td><td>关键字、schema.对象、列（含 JOIN 别名解析）、存储过程签名；元数据异步缓存</td></tr>
+  <tr><td>F2-11</td><td>格式化/大小写转换</td><td><span class="tag s">S</span></td><td>sql-formatter（plsql 方言）；Shift+Alt+F</td></tr>
+  <tr><td>F2-12</td><td>执行计划</td><td><span class="tag s">S</span></td><td>预估计划：EXPLAIN PLAN + DBMS_XPLAN.DISPLAY，表格化展示；实际计划（需权限）C 级</td></tr>
+  <tr><td>F2-13</td><td>查询历史</td><td><span class="tag c">C</span></td><td>按连接记录最近执行语句，可搜索回填</td></tr>
+</table>
+
+<h3>5.3 F3 结果网格与数据编辑</h3>
+<table class="grid">
+  <tr><th style="width:70px">编号</th><th style="width:200px">需求</th><th style="width:64px">优先级</th><th>说明与验收要点</th></tr>
+  <tr><td>F3-01</td><td>网格基础能力</td><td><span class="tag m">M</span></td><td>列排序（前端）、列宽拖拽/自适应、行多选（Ctrl/Shift）、选中行数统计、单元格复制（含「复制为 INSERT/CSV/Markdown」）</td></tr>
+  <tr><td>F3-02</td><td>筛选与查找</td><td><span class="tag s">S</span></td><td>列筛选条件行（=、LIKE、IN、范围）；前端过滤已加载数据 + 「重新按条件查询」（后端 WHERE）双模式</td></tr>
+  <tr><td>F3-03</td><td>NULL 与特殊类型显示</td><td><span class="tag m">M</span></td><td>NULL 斜体灰显（文本可配）；NUMBER/DATE/TIMESTAMP 按 Oracle 精度原样显示；BLOB/CLOB 显示为 (BLOB)/(CLOB) 占位并可查看/另存</td></tr>
+  <tr><td>F3-04</td><td>单元格查看器</td><td><span class="tag s">S</span></td><td>双击/快捷键打开侧边或弹层：长文本、JSON 着色、XML 着色、十六进制（BLOB）、单行/折行切换、编辑（配合 F3-05）</td></tr>
+  <tr><td>F3-05</td><td>单元格编辑与校验</td><td><span class="tag m">M</span></td><td>按列类型校验（NUMBER 精度、DATE 格式）；输入 NULL 显式支持；编辑即入变更集（不立即执行）</td></tr>
+  <tr><td>F3-06</td><td>行级增删</td><td><span class="tag m">M</span></td><td>新增行（网格底部 * 行，录入主键）；删除行支持多选；均入变更集</td></tr>
+  <tr><td>F3-07</td><td>延迟行锁</td><td><span class="tag m">M</span></td><td>首次修改某行时按 ROWID 执行 <code>SELECT ... FOR UPDATE</code>；锁失败（ORA-00054）标红提示重试/跳过</td></tr>
+  <tr><td>F3-08</td><td>变更集与 SQL 预览</td><td><span class="tag m">M</span></td><td>侧栏「待提交更改」列表（UPDATE/INSERT/DELETE 分组）；每项可查看绑定变量 SQL；单项可撤销</td></tr>
+  <tr><td>F3-09</td><td>提交 / 回滚</td><td><span class="tag m">M</span></td><td>工具栏与命令（Ctrl+Alt+C / Ctrl+Alt+R）；提交=变更集 DML 全部执行+COMMIT（原子）；失败回滚并报告；关闭网格有未提交更改时拦截确认</td></tr>
+  <tr><td>F3-10</td><td>编辑能力边界</td><td><span class="tag s">S</span></td><td>仅当查询为「单表可定位」（有可用 ROWID）时启用编辑；含 JOIN/聚合/ROWNUM 改写的结果为只读并说明原因</td></tr>
+  <tr><td>F3-11</td><td>粘贴批量行</td><td><span class="tag c">C</span></td><td>从 Excel/TSV 粘贴多行多列，按列对齐入变更集</td></tr>
+  <tr><td>F3-12</td><td>外键/引用完整性提示</td><td><span class="tag c">C</span></td><td>编辑违返约束时，错误消息翻译为可读提示（ORA-02291 等）</td></tr>
+</table>
+
+<h3>5.4 F4 导出</h3>
+<table class="grid">
+  <tr><th style="width:70px">编号</th><th style="width:200px">需求</th><th style="width:64px">优先级</th><th>说明与验收要点</th></tr>
+  <tr><td>F4-01</td><td>导出格式</td><td><span class="tag m">M</span></td><td>CSV、XLSX（exceljs 流式）、JSON、INSERT 语句、HTML 报表</td></tr>
+  <tr><td>F4-02</td><td>导出范围</td><td><span class="tag m">M</span></td><td>已加载行 / 全部行（重新流式执行）/ 选中行</td></tr>
+  <tr><td>F4-03</td><td>选项</td><td><span class="tag s">S</span></td><td>含表头、NULL 表示、编码（UTF-8/GBK）、CSV 分隔符、日期格式、XLSX 单 sheet 行上限分片、INSERT 表名/schema 覆盖</td></tr>
+  <tr><td>F4-04</td><td>目标</td><td><span class="tag m">M</span></td><td>保存为文件（系统另存对话框）；S 级：复制到剪贴板（小数据量）</td></tr>
+  <tr><td>F4-05</td><td>进度与取消</td><td><span class="tag m">M</span></td><td>进度通知（已导出行数）；可取消；失败清理半成品文件</td></tr>
+  <tr><td>F4-06</td><td>对象树导出</td><td><span class="tag c">C</span></td><td>表右键「导出表数据为 INSERT/CSV」（后台流式）</td></tr>
+</table>
+
+<h3>5.5 F5 数据库对象浏览器</h3>
+<table class="grid">
+  <tr><th style="width:70px">编号</th><th style="width:200px">需求</th><th style="width:64px">优先级</th><th>说明与验收要点</th></tr>
+  <tr><td>F5-01</td><td>对象树结构</td><td><span class="tag m">M</span></td><td>连接 → 当前 schema（可切换/浏览其他 schema，S 级）→ 对象类型节点（表/视图/物化视图/序列/过程/函数/包/触发器/类型/同义词/DB Link/作业）→ 对象；类型节点懒加载并显示计数</td></tr>
+  <tr><td>F5-02</td><td>树搜索过滤</td><td><span class="tag m">M</span></td><td>按名称前缀/模糊过滤；支持「仅显示匹配类型」</td></tr>
+  <tr><td>F5-03</td><td>表对象详情</td><td><span class="tag m">M</span></td><td>标签页：列（名称/类型/可空/默认值/注释）、数据（进入可编辑网格，自动带 ROWID）、约束（主键/外键/唯一/检查，外键可跳转引用表）、索引、触发器、DDL（DBMS_METADATA，带 SQL 着色+复制+另存）、统计信息（行数/大小，S 级）</td></tr>
+  <tr><td>F5-04</td><td>代码对象详情</td><td><span class="tag m">M</span></td><td>过程/函数/包/触发器/视图/类型/序列：源码（USER_SOURCE/ALL_SOURCE）或 DDL 查看，S 级：跳转定义/引用查找（WHERE name LIKE）</td></tr>
+  <tr><td>F5-05</td><td>右键操作集</td><td><span class="tag s">S</span></td><td>打开、查看数据、SELECT/INSERT 骨架生成到工作台、重命名、删除（DROP，需确认对话框并显示影响）、刷新、复制名称</td></tr>
+  <tr><td>F5-06</td><td>权限自适应</td><td><span class="tag s">S</span></td><td>有 DBA 权限时可用 DBA_ 视图浏览全库；否则回退 ALL_/USER_，无权限节点隐藏或置灰</td></tr>
+  <tr><td>F5-07</td><td>树刷新与缓存</td><td><span class="tag s">S</span></td><td>手动刷新 + 会话内缓存（DDL 变更后可失效）</td></tr>
+</table>
+
+<h3>5.6 F6 PL/SQL 调试（依赖自研 DAP 适配器，M4 交付）</h3>
+<table class="grid">
+  <tr><th style="width:70px">编号</th><th style="width:200px">需求</th><th style="width:64px">优先级</th><th>说明与验收要点</th></tr>
+  <tr><td>F6-01</td><td>调试会话建立</td><td><span class="tag m">M</span></td><td>选择连接与目标程序单元（过程/函数/包/匿名块）；自动创建「目标会话 + 调试会话」两条数据库连接（同插件进程内）</td></tr>
+  <tr><td>F6-02</td><td>行断点</td><td><span class="tag m">M</span></td><td>编辑器行首槽点击设置；映射到 (OWNER, 对象名, 类型, 行号)（包体按 body 行号）；断点未验证/已验证/失效状态</td></tr>
+  <tr><td>F6-03</td><td>启动/附加与停止</td><td><span class="tag m">M</span></td><td>F5 启动调试（目标会话执行程序，断点挂起时 UI 停在该行）；停止=DETACH 并终止目标会话执行</td></tr>
+  <tr><td>F6-04</td><td>单步执行</td><td><span class="tag m">M</span></td><td>继续 / 单步跳入 / 单步跳过 / 跳出（DBMS_DEBUG.CONTINUE 各模式）</td></tr>
+  <tr><td>F6-05</td><td>变量查看</td><td><span class="tag m">M</span></td><td>局部变量（标量 + 记录/集合等复合类型树形展开）；标量可修值（SET_VALUE，S 级）</td></tr>
+  <tr><td>F6-06</td><td>调用栈</td><td><span class="tag m">M</span></td><td>栈帧列表（GET_STACK），点击跳转对应对象源码行</td></tr>
+  <tr><td>F6-07</td><td>监视表达式</td><td><span class="tag s">S</span></td><td>标量表达式求值（GET_VALUE 语法）</td></tr>
+  <tr><td>F6-08</td><td>DBMS_OUTPUT 联动</td><td><span class="tag s">S</span></td><td>调试挂起/结束时回收 DBMS_OUTPUT 到调试控制台</td></tr>
+  <tr><td>F6-09</td><td>异常断点</td><td><span class="tag c">C</span></td><td>未处理异常自动断在抛出位置</td></tr>
+  <tr><td>F6-10</td><td>降级预案</td><td><span class="tag s">S</span></td><td>若 DBMS_DEBUG PoC 不达标（R1）：交付「插桩调试」——一键在选中 PL/SQL 前后注入 DBMS_OUTPUT 变量打印 + utPLSQL 断言运行；DAP 完整版顺延</td></tr>
+</table>
+
+<h3>5.7 F7 PostgreSQL 预留（M5 实装）</h3>
+<table class="grid">
+  <tr><th style="width:70px">编号</th><th style="width:200px">需求</th><th style="width:64px">优先级</th><th>说明与验收要点</th></tr>
+  <tr><td>F7-01</td><td>驱动抽象接口（IDbDriver）</td><td><span class="tag m">M</span></td><td>自 M0 起落地：connect/test/listSchemas/listObjects/describe/getDdl/fetch(流式)/applyChangeset/commit/rollback/cancel + capabilities + 方言；所有功能仅依赖接口</td></tr>
+  <tr><td>F7-02</td><td>UI 预留</td><td><span class="tag m">M</span></td><td>新建连接的类型下拉含「PostgreSQL（预留）」置灰项；图标与文案到位</td></tr>
+  <tr><td>F7-03</td><td>PostgresDriver 实装</td><td><span class="tag w">W(M5)</span></td><td>pg 驱动 + pg_catalog 元数据 + pg_dump 独立 DDL 获取（或信息函数）；编辑定位用 ctid；导出/网格全复用</td></tr>
+  <tr><td>F7-04</td><td>能力降级框架</td><td><span class="tag s">S</span></td><td>UI 依据 capabilities 隐藏不支持项（如 PG 无 DBMS_OUTPUT、无同节点调试）</td></tr>
+</table>
+
+<h3>5.8 F8 通用、设置与安全</h3>
+<table class="grid">
+  <tr><th style="width:70px">编号</th><th style="width:200px">需求</th><th style="width:64px">优先级</th><th>说明与验收要点</th></tr>
+  <tr><td>F8-01</td><td>状态栏集成</td><td><span class="tag m">M</span></td><td>当前连接·schema、事务状态（未提交更改数）、驱动模式（thin/thick）</td></tr>
+  <tr><td>F8-02</td><td>命令面板命令集</td><td><span class="tag m">M</span></td><td>所有功能均有命令入口（清单见原型文档 §5）</td></tr>
+  <tr><td>F8-03</td><td>输出通道与日志</td><td><span class="tag m">M</span></td><td>「SQLAdmin」输出通道；诊断日志分级；连接错误带 ORA 码</td></tr>
+  <tr><td>F8-04</td><td>设置项</td><td><span class="tag m">M</span></td><td>默认获取行数/批量、DBMS_OUTPUT 缓冲、NULL 显示文本、导出默认格式、日期/时间戳显示格式、自动提交开关（默认关）、空闲会话回收时长、代理</td></tr>
+  <tr><td>F8-05</td><td>国际化</td><td><span class="tag s">S</span></td><td>VS Code l10n，首发 zh-CN + en</td></tr>
+  <tr><td>F8-06</td><td>遥测</td><td><span class="tag w">W</span></td><td>默认关闭，如启用须先征得同意</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="s6">6. 非功能需求</h2>
+<table class="grid">
+  <tr><th style="width:120px">维度</th><th>要求</th></tr>
+  <tr><td>性能</td><td>连接建立 ≤2s（局域网）；首屏 500 行 ≤1s；网格 10 万已加载行滚动不掉帧（虚拟滚动）；100 万行导出 XLSX ≤90s 且峰值内存 ≤500MB（流式分批，可取消）</td></tr>
+  <tr><td>安全</td><td>密码仅存 SecretStorage；导出的连接配置脱敏；只读模式可拦截 DML/编辑；不内置任何明文凭据默认值；文档提示生产环境用最小权限账号</td></tr>
+  <tr><td>兼容性</td><td>VS Code ≥1.85（桌面版；Remote SSH/WSL 场景目标支持，Web 版 vscode.dev 为 C 级）；Windows/macOS/Linux；Oracle DB 12.1–23ai（thin），11.2+（thick，用户自备客户端）；Node 18+</td></tr>
+  <tr><td>可靠性</td><td>连接断开自动检测并提示重连；未提交更改保护（关闭前确认）；插件异常不拖垮 VS Code 主进程（崩溃后连接资源由服务端回收）</td></tr>
+  <tr><td>可维护性</td><td>TypeScript strict；核心层（驱动/执行/变更集）与 UI 层解耦，核心层单元测试覆盖率 ≥70%；依赖许可证 CI 校验；语义化版本 + CHANGELOG</td></tr>
+  <tr><td>可扩展性</td><td>IDbDriver + 方言注册机制；对象类型详情页可插拔（为 PG 及未来库扩展）</td></tr>
+  <tr><td>可用性</td><td>所有操作与 SQL Developer 习惯对齐（Ctrl+Enter 执行、结果内直接编辑、F5 调整为脚本执行避免冲突）；深浅色主题自适应；中文/英文</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="s7">7. 版本规划与里程碑</h2>
+<table class="grid">
+  <tr><th style="width:70px">里程碑</th><th style="width:110px">周期(估)</th><th>范围</th><th style="width:280px">退出标准（验收）</th></tr>
+  <tr><td>M0 骨架</td><td>第 1–2 周</td><td>工程脚手架（TypeScript/webpack/vsix/CI）、IDbDriver 接口定义、依赖许可证校验流水线、oracle-free 集成测试环境</td><td>vsix 可打包安装；CI 全绿；接口评审通过</td></tr>
+  <tr><td>M1 查询 Alpha</td><td>第 3–6 周</td><td>F1-01..04、F2-01..04/06/09、只读网格（F3-01 部分）、F8-01..04</td><td>连接→执行→流式结果→DBMS_OUTPUT 全链路可用；10 万行流畅</td></tr>
+  <tr><td>M2 编辑与导出</td><td>第 7–10 周</td><td>F3-03/05/06/07/08/09/10、F4-01..05、F5-01/02/03(部分)</td><td>结果编辑→预览→提交/回滚闭环；100 万行流式导出达标（§6）</td></tr>
+  <tr><td>M3 对象与效率</td><td>第 11–14 周</td><td>F5 全部剩余、F2-05/07/08/10/11/12、F3-02/04、F8-05、F1-05..07</td><td>对象树/详情/DDL 完整；补全与格式化可用；发布 0.x Marketplace 内测</td></tr>
+  <tr><td>M4 PL/SQL 调试</td><td>第 15–20 周</td><td>F6-01..06/08 + R1 PoC（先行 2 周）；不达标转 F6-10 降级</td><td>断点/单步/变量/调用栈演示通过；或降级方案按期交付</td></tr>
+  <tr><td>M5 PostgreSQL 与发布</td><td>第 21–24 周</td><td>F7-03/04、F1-08/09、F3-11/12、打磨与文档、1.0 发布</td><td>PG 端到端用例通过；性能/安全清单复核；1.0 Marketplace 发布</td></tr>
+</table>
+<p class="fig-cap">注：周期为 1 名全职工程师估算；M2/M3 可双人并行压缩。里程碑范围允许基于 PoC 结论调整，调整需重新评审。</p>
+
+<!-- ============================================================ -->
+<h2 id="s8">8. 测试与验收策略</h2>
+<table class="grid">
+  <tr><th style="width:150px">层级</th><th>内容与工具</th></tr>
+  <tr><td>单元测试</td><td>语句切分器（专项语料库：PL/SQL 块/注释/引号/动态 SQL）、变更集 DML 生成、类型校验/格式化、方言层</td></tr>
+  <tr><td>集成测试</td><td>容器化 Oracle：<a href="https://github.com/gvenzl/oracle-free">gvenzl/oracle-free</a>（Oracle Free，开发测试用途）+ PostgreSQL 官方镜像；@vscode/test-electron 跑端到端用例（连接/执行/编辑/导出）</td></tr>
+  <tr><td>调试专项</td><td>M4 PoC 验收脚本：断点命中、步进正确性、变量一致性（与 DBMS_OUTPUT 手工记录比对）</td></tr>
+  <tr><td>性能基准</td><td>脚本化：100 万行导出计时/内存采样；网格 10 万行滚动 FPS；纳入 CI 夜间任务</td></tr>
+  <tr><td>手工验收矩阵</td><td>功能需求逐条映射测试用例（本文档各表「验收要点」为来源）；SQL Developer 行为对照清单（编辑/事务/导出格式差异登记）</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="s9">9. 附录</h2>
+
+<h3>附录 A：与 SQL Developer 功能对照（首发达成度）</h3>
+<table class="grid">
+  <tr><th>能力</th><th>SQL Developer</th><th>SQLAdmin 首发（M0–M3）</th><th>SQLAdmin 1.0（M4–M5）</th></tr>
+  <tr><td>连接管理（含 Wallet/TNS）</td><td>完整</td><td>基本认证 + Easy Connect + TNS 别名</td><td>同一 + thick/只读/分组</td></tr>
+  <tr><td>SQL 执行/脚本/DBMS_OUTPUT</td><td>完整</td><td>对齐（多结果集、脚本汇总）</td><td>同一 + 实际执行计划</td></tr>
+  <tr><td>结果内编辑 + 提交回滚</td><td>完整</td><td>对齐核心（延迟行锁、变更集、SQL 预览）</td><td>同一 + 批量粘贴</td></tr>
+  <tr><td>导出</td><td>多格式</td><td>CSV/XLSX/JSON/INSERT/HTML 流式</td><td>同一 + 表级批量导出</td></tr>
+  <tr><td>对象浏览器 + DDL</td><td>完整</td><td>核心对象类型 + DDL + 表详情</td><td>同一 + 跳转/引用查找</td></tr>
+  <tr><td>PL/SQL 调试</td><td>完整（JDWP）</td><td>—（不承诺）</td><td>DBMS_DEBUG 版 DAP（断点/单步/变量/栈），受 R1 约束</td></tr>
+  <tr><td>PostgreSQL</td><td>—</td><td>接口与 UI 预留</td><td>查询/编辑/导出/对象浏览</td></tr>
+  <tr><td>建模/报表/DBA 运维</td><td>有</td><td colspan="2">明确不做（§2.3）</td></tr>
+</table>
+
+<h3>附录 B：第三方组件清单（随 <code>THIRD_PARTY_NOTICES.md</code> 维护）</h3>
+<p>见 §3.3 合规矩阵；任何新增依赖须先登记许可证并过 CI 校验后方可引入。</p>
+
+<h3>附录 C：本次调研主要来源</h3>
+<ul>
+  <li>node-oracledb 文档与仓库：<a href="https://node-oracledb.readthedocs.io/en/latest/user_guide/introduction.html">Introduction（thin/thick 与支持版本）</a>、<a href="https://github.com/oracle/node-oracledb">oracle/node-oracledb</a>（Apache-2.0 OR UPL-1.0）</li>
+  <li>SQLTools：<a href="https://github.com/mtxr/vscode-sqltools">mtxr/vscode-sqltools</a>（MIT）</li>
+  <li>DBeaver Community：<a href="https://github.com/dbeaver/dbeaver">dbeaver/dbeaver</a>（Apache-2.0）</li>
+  <li>Oracle 官方 VS Code 插件：<a href="https://marketplace.visualstudio.com/items?itemName=Oracle.oracledevtools">Marketplace：Oracle.oracledevtools</a></li>
+  <li>Oracle 调试接口文档：DBMS_DEBUG / DBMS_DEBUG_JDWP（<a href="https://docs.oracle.com/en/database/oracle/oracle-database/">PL/SQL Packages Reference</a>）；SQL Developer 调试（JDWP）用户指南</li>
+  <li>utPLSQL：<a href="https://github.com/utPLSQL/utPLSQL">utPLSQL/utPLSQL</a>（Apache-2.0）；gvenzl/oracle-free：<a href="https://github.com/gvenzl/oracle-free">测试镜像</a></li>
+</ul>
+
+<footer>
+  SQLAdmin 需求文档 v0.1 · 2026-09-29 · 仓库 <a href="https://github.com/Emon9426/SQLAdmin">github.com/Emon9426/SQLAdmin</a> ·
+  配套文档：<a href="prototype-design.html">原型设计文档</a> · 本文档由需求阶段产出，评审通过后冻结为开发基线
+</footer>
+</div>
+</body>
+</html>
