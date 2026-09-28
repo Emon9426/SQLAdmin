@@ -21,8 +21,8 @@ type Api = any;
 
 async function getApi(): Promise<Api> {
   const all = vscode.extensions.all.map((e) => e.id);
-  const ext = vscode.extensions.getExtension<Api>('Emon9426.sqladmin');
-  assert.ok(ext, `扩展未找到（检查 package.json publisher.name = Emon9426.sqladmin）。已加载扩展: ${all.join(', ')}`);
+  const ext = vscode.extensions.getExtension<Api>('EmonZhang3438.sqladmin');
+  assert.ok(ext, `扩展未找到（检查 package.json publisher.name = EmonZhang3438.sqladmin）。已加载扩展: ${all.join(', ')}`);
   if (!ext.isActive) { await ext.activate(); }
   assert.ok(ext.isActive, '扩展激活失败');
   return ext.exports;

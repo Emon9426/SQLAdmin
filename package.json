@@ -3,7 +3,7 @@
   "displayName": "SQLAdmin — Oracle Database Tools",
   "description": "Oracle database development toolkit for VS Code: connect, run SQL, edit results with commit/rollback, export, browse objects (SQL Developer-style), with PostgreSQL-ready driver abstraction.",
   "version": "0.1.0",
-  "publisher": "Emon9426",
+  "publisher": "EmonZhang3438",
   "license": "Apache-2.0",
   "icon": "media/icon.png",
   "repository": {
