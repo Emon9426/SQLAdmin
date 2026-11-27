@@ -13,3 +13,4 @@ media/make-icon.ps1
 .github/**
 .gitignore
 npm-debug.log*
+.zcode/**
